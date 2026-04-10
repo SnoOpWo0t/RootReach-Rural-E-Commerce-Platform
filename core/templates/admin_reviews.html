@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}Review Moderation - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5">
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="mb-0">Review Moderation</h1>
+                <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-primary">Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-lg-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form method="get" class="form-inline">
+                        <div class="form-group mr-3">
+                            <label for="rating" class="mr-2">Rating:</label>
+                            <select name="rating" id="rating" class="form-control">
+                                <option value="">All Ratings</option>
+                                <option value="5" {% if rating_filter == '5' %}selected{% endif %}>5 Stars</option>
+                                <option value="4" {% if rating_filter == '4' %}selected{% endif %}>4 Stars</option>
+                                <option value="3" {% if rating_filter == '3' %}selected{% endif %}>3 Stars</option>
+                                <option value="2" {% if rating_filter == '2' %}selected{% endif %}>2 Stars</option>
+                                <option value="1" {% if rating_filter == '1' %}selected{% endif %}>1 Star</option>
+                            </select>
+                        </div>
+                        <div class="form-group mr-3">
+                            <label for="product" class="mr-2">Product:</label>
+                            <select name="product" id="product" class="form-control">
+                                <option value="">All Products</option>
+                                {% for product in products %}
+                                <option value="{{ product.id }}" {% if product_filter|stringformat:"i" == product.id|stringformat:"i" %}selected{% endif %}>
+                                    {{ product.name|truncatewords:4 }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group mr-3">
+                            <input type="text" name="search" class="form-control" placeholder="Search reviews..." value="{{ search }}">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                        <a href="{% url 'admin_reviews' %}" class="btn btn-secondary ml-2">Reset</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reviews List -->
+    <div class="row">
+        <div class="col-lg-12">
+            {% for review in reviews %}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5 class="mb-0">{{ review.product.name|truncatewords:5 }}</h5>
+                            <small class="text-muted">by <strong>{{ review.reviewer.username }}</strong></small>
+                        </div>
+                        <div class="col-md-4 text-right">
+                            <span class="text-warning" style="font-size: 1.2rem;">
+                                {% for i in "x"|rjust:"5" %}
+                                    {% if forloop.counter <= review.rating %}<i class="fas fa-star"></i>{% else %}<i class="far fa-star"></i>{% endif %}
+                                {% endfor %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="mb-3">{{ review.comment }}</p>
+                    {% if review.image %}
+                    <div class="mb-3">
+                        <img src="{{ review.image.url }}" alt="Review Image" style="max-width: 200px; border-radius: 4px;">
+                    </div>
+                    {% endif %}
+                    <p class="small text-muted mb-0">
+                        Reviewed on {{ review.created_at|date:"M d, Y H:i" }}
+                        {% if review.is_verified_buyer %}
+                            <span class="badge badge-success ml-2">Verified Buyer</span>
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="card-footer bg-light">
+                    <a href="{% url 'admin_delete_review' review.id %}" onclick="return confirm('Delete this review? This action cannot be undone.')" class="btn btn-sm btn-danger">
+                        <i class="fas fa-trash"></i> Delete Review
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="card shadow-sm">
+                <div class="card-body text-center py-5">
+                    <p class="text-muted mb-0">No reviews found</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

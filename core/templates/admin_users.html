@@ -1,0 +1,645 @@
+{% extends 'base.html' %}
+
+{% block title %}User Management - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="admin-page-container">
+    <!-- Header Section -->
+    <div class="admin-page-header">
+        <div class="container-fluid px-4">
+            <div class="header-top">
+                <div class="header-title">
+                    <a href="{% url 'admin_dashboard' %}" class="back-link">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <div>
+                        <h1>User Management</h1>
+                        <p>Manage and monitor all platform users</p>
+                    </div>
+                </div>
+                <div class="header-stats">
+                    <div class="stat-item">
+                        <span class="stat-value">{{ users|length }}</span>
+                        <span class="stat-label">Total Users</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-page-content">
+        <div class="container-fluid px-4">
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <div class="filter-card">
+                    <form method="get" action="" class="filter-form">
+                        <div class="filter-group">
+                            <div class="filter-item">
+                                <label for="type">User Type</label>
+                                <select name="type" id="type" class="filter-select">
+                                    <option value="">All Users</option>
+                                    <option value="buyer" {% if user_type_filter == 'buyer' %}selected{% endif %}>Buyers</option>
+                                    <option value="seller" {% if user_type_filter == 'seller' %}selected{% endif %}>Sellers</option>
+                                    <option value="admin" {% if user_type_filter == 'admin' %}selected{% endif %}>Admins</option>
+                                </select>
+                            </div>
+                            <div class="filter-item">
+                                <label for="search">Search</label>
+                                <input type="text" name="search" id="search" class="filter-input" placeholder="Username or email..." value="{{ search }}">
+                            </div>
+                            <div class="filter-actions">
+                                <button type="submit" class="filter-btn filter-btn-primary">
+                                    <i class="fas fa-search"></i> Filter
+                                </button>
+                                <a href="{% url 'admin_users' %}" class="filter-btn filter-btn-secondary">
+                                    <i class="fas fa-redo"></i> Reset
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Users Table -->
+            <div class="table-section">
+                <div class="table-card">
+                    <div class="table-header">
+                        <h3>All Users</h3>
+                        <span class="table-count">{{ users|length }} users</span>
+                    </div>
+                    <div class="table-wrapper">
+                        {% if users %}
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>User Type</th>
+                                    <th>Status</th>
+                                    <th>Joined</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user in users %}
+                                <tr class="table-row">
+                                    <td class="user-name">
+                                        <div class="user-avatar">{{ user.username|first|upper }}</div>
+                                        <strong>{{ user.username }}</strong>
+                                    </td>
+                                    <td>{{ user.email }}</td>
+                                    <td>
+                                        <span class="badge badge-type-{% if user.user_type == 'admin' %}admin{% elif user.user_type == 'seller' %}seller{% else %}buyer{% endif %}">
+                                            {{ user.get_user_type_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge {% if user.is_active %}status-active{% else %}status-inactive{% endif %}">
+                                            {% if user.is_active %}Active{% else %}Inactive{% endif %}
+                                        </span>
+                                    </td>
+                                    <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <a href="{% url 'admin_user_details' user.id %}" class="btn-icon" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            {% if user.is_active %}
+                                                <a href="{% url 'admin_deactivate_user' user.id %}" onclick="return confirm('Deactivate this user?')" class="btn-icon btn-warning" title="Deactivate">
+                                                    <i class="fas fa-ban"></i>
+                                                </a>
+                                            {% else %}
+                                                <a href="{% url 'admin_activate_user' user.id %}" class="btn-icon btn-success" title="Activate">
+                                                    <i class="fas fa-check"></i>
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <p>No users found</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Admin Page Container */
+    .admin-page-container {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        padding-bottom: 4rem;
+    }
+
+    /* Page Header */
+    .admin-page-header {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        padding: 2.5rem 0;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 2rem;
+    }
+
+    .header-title {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        flex: 1;
+    }
+
+    .back-link {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 10px;
+        color: white;
+        text-decoration: none;
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .back-link:hover {
+        background: rgba(255, 255, 255, 0.25);
+        border-color: rgba(255, 255, 255, 0.4);
+        transform: translateX(-3px);
+        color: white;
+    }
+
+    .header-title h1 {
+        color: white;
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 800;
+    }
+
+    .header-title p {
+        color: rgba(255, 255, 255, 0.8);
+        margin: 0.5rem 0 0 0;
+        font-size: 0.95rem;
+    }
+
+    .header-stats {
+        display: flex;
+        gap: 2rem;
+    }
+
+    .stat-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 1.5rem 2.5rem;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: white;
+        line-height: 1;
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.7);
+        margin-top: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Page Content */
+    .admin-page-content {
+        padding: 3rem 0;
+    }
+
+    /* Filter Section */
+    .filter-section {
+        margin-bottom: 2.5rem;
+    }
+
+    .filter-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .filter-form {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+        align-items: flex-end;
+    }
+
+    .filter-group {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        width: 100%;
+    }
+
+    .filter-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .filter-item label {
+        font-weight: 600;
+        color: #1f2937;
+        font-size: 0.9rem;
+    }
+
+    .filter-select,
+    .filter-input {
+        padding: 0.75rem 1rem;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background: white;
+        color: #1f2937;
+    }
+
+    .filter-select:focus,
+    .filter-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        background: white;
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .filter-btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .filter-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+
+    .filter-btn-secondary {
+        background: #f3f4f6;
+        color: #1f2937;
+        border: 1.5px solid #e5e7eb;
+    }
+
+    .filter-btn-secondary:hover {
+        background: #e5e7eb;
+        border-color: #d1d5db;
+        color: #1f2937;
+    }
+
+    /* Table Section */
+    .table-section {
+        margin-top: 2rem;
+    }
+
+    .table-card {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .table-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 2rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .table-header h3 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1f2937;
+    }
+
+    .table-count {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    .modern-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0;
+    }
+
+    .modern-table thead {
+        background: #f9fafb;
+    }
+
+    .modern-table thead th {
+        padding: 1.25rem 2rem;
+        text-align: left;
+        font-weight: 700;
+        color: #6b7280;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    .modern-table tbody tr {
+        border-bottom: 1px solid #e5e7eb;
+        transition: all 0.3s ease;
+    }
+
+    .modern-table tbody tr:hover {
+        background: rgba(102, 126, 234, 0.03);
+    }
+
+    .modern-table tbody td {
+        padding: 1.25rem 2rem;
+        color: #1f2937;
+        font-size: 0.95rem;
+    }
+
+    .user-name {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+
+    /* Badges */
+    .badge {
+        display: inline-block;
+        padding: 0.4rem 0.9rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .badge-type-admin {
+        background: rgba(239, 68, 68, 0.15);
+        color: #dc2626;
+    }
+
+    .badge-type-seller {
+        background: rgba(59, 130, 246, 0.15);
+        color: #2563eb;
+    }
+
+    .badge-type-buyer {
+        background: rgba(16, 185, 129, 0.15);
+        color: #059669;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .status-active {
+        background: rgba(16, 185, 129, 0.15);
+        color: #059669;
+    }
+
+    .status-inactive {
+        background: rgba(239, 68, 68, 0.15);
+        color: #dc2626;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-icon {
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background: #f3f4f6;
+        color: #667eea;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        border: 1.5px solid #e5e7eb;
+    }
+
+    .btn-icon:hover {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-icon.btn-warning {
+        color: #f59e0b;
+    }
+
+    .btn-icon.btn-warning:hover {
+        background: #f59e0b;
+        color: white;
+        border-color: #f59e0b;
+    }
+
+    .btn-icon.btn-success {
+        color: #10b981;
+    }
+
+    .btn-icon.btn-success:hover {
+        background: #10b981;
+        color: white;
+        border-color: #10b981;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #9ca3af;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .empty-state p {
+        margin: 0;
+        font-weight: 500;
+        font-size: 1.1rem;
+    }
+
+    /* Dark Mode Support */
+    [data-theme="dark"] .admin-page-container {
+        background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+    }
+
+    [data-theme="dark"] .filter-card,
+    [data-theme="dark"] .table-card {
+        background: #272f3f;
+        border-color: rgba(79, 172, 254, 0.1);
+    }
+
+    [data-theme="dark"] .header-title h1 {
+        color: #f0f9ff;
+    }
+
+    [data-theme="dark"] .table-header h3 {
+        color: #f0f9ff;
+    }
+
+    [data-theme="dark"] .modern-table thead th {
+        background: rgba(79, 172, 254, 0.1);
+        color: #9ca3af;
+        border-bottom-color: rgba(79, 172, 254, 0.2);
+    }
+
+    [data-theme="dark"] .modern-table tbody td {
+        color: #f0f9ff;
+        border-bottom-color: rgba(79, 172, 254, 0.1);
+    }
+
+    [data-theme="dark"] .modern-table tbody tr:hover {
+        background: rgba(102, 126, 234, 0.1);
+    }
+
+    [data-theme="dark"] .filter-select,
+    [data-theme="dark"] .filter-input {
+        background: #374151;
+        color: #f0f9ff;
+        border-color: rgba(79, 172, 254, 0.2);
+    }
+
+    [data-theme="dark"] .filter-btn-secondary {
+        background: rgba(79, 172, 254, 0.1);
+        color: #f0f9ff;
+        border-color: rgba(79, 172, 254, 0.2);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .header-top {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .header-stats {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .filter-group {
+            flex-direction: column;
+        }
+
+        .filter-item {
+            width: 100%;
+        }
+
+        .filter-actions {
+            width: 100%;
+        }
+
+        .filter-btn {
+            flex: 1;
+            justify-content: center;
+        }
+
+        .table-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .modern-table thead th {
+            padding: 1rem;
+            font-size: 0.75rem;
+        }
+
+        .modern-table tbody td {
+            padding: 1rem;
+        }
+
+        .action-buttons {
+            justify-content: flex-start;
+        }
+    }
+</style>
+{% endblock %}

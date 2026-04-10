@@ -1,0 +1,486 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}RootReach - Compare Products{% endblock %}
+
+{% block extra_css %}
+<style>
+    .comparison-container {
+        margin: 40px 0;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .comparison-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .comparison-header h1 {
+        font-size: 2.5rem;
+        color: var(--text-primary);
+        margin-bottom: 10px;
+    }
+
+    .comparison-header p {
+        color: #666;
+        font-size: 1.1rem;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #999;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: #ddd;
+        margin-bottom: 20px;
+        display: block;
+    }
+
+    .empty-state h2 {
+        font-size: 1.8rem;
+        margin-bottom: 10px;
+        color: #666;
+    }
+
+    .empty-state p {
+        font-size: 1.1rem;
+        margin-bottom: 30px;
+    }
+
+    /* Comparison Grid */
+    .comparison-grid {
+        display: grid;
+        grid-template-columns: 200px 1fr 1fr;
+        gap: 20px;
+        overflow-x: auto;
+    }
+
+    .comparison-label {
+        font-weight: 600;
+        color: var(--text-dark);
+        padding: 15px;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 8px;
+        align-self: center;
+    }
+
+    .product-card {
+        position: relative;
+        background: rgba(255, 255, 255, 0.08);
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    /* Product Images */
+    .product-image-compare {
+        width: 100%;
+        height: 250px;
+        object-fit: cover;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .image-wrapper {
+        position: relative;
+        height: 250px;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #f5f5f5;
+    }
+
+    .image-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Product Name */
+    .product-name-compare {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text-dark);
+        line-height: 1.4;
+    }
+
+    /* Specification Item */
+    .spec-item {
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        font-size: 0.95rem;
+        color: #555;
+    }
+
+    .spec-item.in-stock {
+        background-color: rgba(46, 125, 50, 0.1);
+        color: #2e7d32;
+        font-weight: 500;
+    }
+
+    .spec-item.out-of-stock {
+        background-color: rgba(198, 40, 40, 0.1);
+        color: #c62828;
+        font-weight: 500;
+    }
+
+    .spec-item.price {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: var(--primary);
+        text-align: center;
+        padding: 20px 15px;
+    }
+
+    .spec-item.discount-price {
+        font-size: 1.1rem;
+        color: #e74c3c;
+        text-decoration: line-through;
+    }
+
+    /* Rating */
+    .rating-compare {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        justify-content: center;
+        padding: 10px;
+        background: rgba(255, 193, 7, 0.1);
+        border-radius: 8px;
+    }
+
+    .rating-stars {
+        color: #ffc107;
+        font-size: 1rem;
+    }
+
+    .rating-value {
+        font-weight: 600;
+        color: #333;
+    }
+
+    /* Action Buttons */
+    .comparison-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .comparison-actions .btn {
+        flex: 1;
+        padding: 10px;
+        font-size: 0.9rem;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-remove {
+        background: rgba(231, 76, 60, 0.1);
+        color: #e74c3c;
+        border: 1px solid #e74c3c;
+    }
+
+    .btn-remove:hover {
+        background: #e74c3c;
+        color: white;
+    }
+
+    .btn-view {
+        background: var(--primary);
+        color: white;
+        border: 1px solid var(--primary);
+    }
+
+    .btn-view:hover {
+        opacity: 0.9;
+    }
+
+    .btn-add-cart {
+        background: #27ae60;
+        color: white;
+        border: 1px solid #27ae60;
+    }
+
+    .btn-add-cart:hover {
+        opacity: 0.9;
+    }
+
+    /* Header Actions */
+    .comparison-header-actions {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 40px;
+    }
+
+    .comparison-header-actions .btn {
+        padding: 12px 25px;
+        border-radius: 8px;
+        border: none;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-continue-shopping {
+        background: var(--primary);
+        color: white;
+    }
+
+    .btn-continue-shopping:hover {
+        opacity: 0.9;
+    }
+
+    .btn-clear {
+        background: rgba(231, 76, 60, 0.1);
+        color: #e74c3c;
+        border: 1px solid #e74c3c;
+    }
+
+    .btn-clear:hover {
+        background: #e74c3c;
+        color: white;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .comparison-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .comparison-grid .comparison-label {
+            grid-column: 1 / -1;
+            background: rgba(100, 100, 100, 0.1);
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .comparison-header h1 {
+            font-size: 2rem;
+        }
+    }
+
+    /* Dark Mode */
+    [data-theme="dark"] .spec-item {
+        background: rgba(255, 255, 255, 0.05);
+        color: #aaa;
+    }
+
+    [data-theme="dark"] .product-card {
+        background: rgba(255, 255, 255, 0.05);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="comparison-container">
+        <div class="comparison-header">
+            <h1>🔄 Product Comparison</h1>
+            <p>Compare up to 2 products side by side to make an informed decision</p>
+        </div>
+
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% if products|length == 0 %}
+            <div class="empty-state">
+                <i class="fas fa-balance-scale"></i>
+                <h2>No Products Selected for Comparison</h2>
+                <p>Start adding products to compare them side by side</p>
+                <a href="{% url 'home' %}" class="btn btn-primary">
+                    <i class="fas fa-shopping-bag"></i> Browse Products
+                </a>
+            </div>
+        {% elif products|length == 1 %}
+            <div class="empty-state">
+                <i class="fas fa-plus-circle"></i>
+                <h2>Select One More Product</h2>
+                <p>You need to select another product to compare</p>
+                <a href="{% url 'home' %}" class="btn btn-primary">
+                    <i class="fas fa-shopping-bag"></i> Browse Products
+                </a>
+            </div>
+        {% else %}
+            <!-- Header Actions -->
+            <div class="comparison-header-actions">
+                <a href="{% url 'home' %}" class="btn btn-continue-shopping">
+                    <i class="fas fa-plus-circle"></i> Add More Products
+                </a>
+                <a href="{% url 'clear_comparison' %}" class="btn btn-clear">
+                    <i class="fas fa-trash"></i> Clear All
+                </a>
+            </div>
+
+            <!-- Comparison Grid -->
+            <div class="comparison-grid">
+                <!-- Header Row -->
+                <div class="comparison-label">Specifications</div>
+                <div class="product-card" style="background: transparent; border: none; padding: 0;">
+                    <div class="product-name-compare">Product 1</div>
+                </div>
+                <div class="product-card" style="background: transparent; border: none; padding: 0;">
+                    <div class="product-name-compare">Product 2</div>
+                </div>
+
+                <!-- Product Images -->
+                <div class="comparison-label">Image</div>
+                {% for product in products %}
+                    <div class="product-card">
+                        <div class="image-wrapper">
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                        </div>
+                    </div>
+                {% endfor %}
+
+                <!-- Product Names -->
+                <div class="comparison-label">Name</div>
+                {% for product in products %}
+                    <div class="product-card">
+                        <div class="product-name-compare">{{ product.name }}</div>
+                    </div>
+                {% endfor %}
+
+                <!-- Category -->
+                <div class="comparison-label">Category</div>
+                {% for product in products %}
+                    <div class="product-card">
+                        <div class="spec-item">{{ product.category.name|default:"N/A" }}</div>
+                    </div>
+                {% endfor %}
+
+                <!-- Price -->
+                <div class="comparison-label">Price</div>
+                {% for product in products %}
+                    <div class="product-card">
+                        <div class="spec-item price">${{ product.price }}</div>
+                    </div>
+                {% endfor %}
+
+                <!-- Discounted Price -->
+                <div class="comparison-label">Discounted Price</div>
+                {% for product in products %}
+                    <div class="product-card">
+                        <div class="spec-item discount-price">
+                            {% if product.discounted_price %}
+                                ${{ product.discounted_price }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+
+                <!-- Stock -->
+                <div class="comparison-label">Stock Status</div>
+                {% for product in products %}
+                    <div class="product-card">
+                        {% if product.stock > 0 %}
+                            <div class="spec-item in-stock">
+                                <i class="fas fa-check-circle"></i> {{ product.stock }} in stock
+                            </div>
+                        {% else %}
+                            <div class="spec-item out-of-stock">
+                                <i class="fas fa-times-circle"></i> Out of Stock
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <!-- Region -->
+                <div class="comparison-label">Region</div>
+                {% for product in products %}
+                    <div class="product-card">
+                        <div class="spec-item">{{ product.region }}</div>
+                    </div>
+                {% endfor %}
+
+                <!-- Seller -->
+                <div class="comparison-label">Seller</div>
+                {% for product in products %}
+                    <div class="product-card">
+                        <div class="spec-item">{{ product.seller.username }}</div>
+                    </div>
+                {% endfor %}
+
+                <!-- Rating -->
+                <div class="comparison-label">Rating</div>
+                {% for product in products %}
+                    <div class="product-card">
+                        <div class="rating-compare">
+                            <span class="rating-stars">
+                                {% for i in "12345" %}
+                                    {% if i|add:0 <= product.rating %}
+                                        <i class="fas fa-star"></i>
+                                    {% else %}
+                                        <i class="far fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </span>
+                            <span class="rating-value">{{ product.rating|floatformat:1 }}/5</span>
+                        </div>
+                    </div>
+                {% endfor %}
+
+                <!-- Actions -->
+                <div class="comparison-label">Actions</div>
+                {% for product in products %}
+                    <div class="product-card">
+                        <div class="comparison-actions">
+                            <a href="{% url 'product_detail' product.id %}" class="btn btn-view">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                            {% if user.is_authenticated and user.is_buyer %}
+                                <a href="{% url 'add_to_cart' product.id %}" class="btn btn-add-cart">
+                                    <i class="fas fa-shopping-cart"></i> Cart
+                                </a>
+                            {% endif %}
+                            <a href="{% url 'remove_from_comparison' product.id %}" class="btn btn-remove">
+                                <i class="fas fa-trash"></i> Remove
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-hide alerts after 5 seconds
+    setTimeout(function() {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            alert.style.transition = 'opacity 0.5s ease';
+            alert.style.opacity = '0';
+            setTimeout(() => alert.remove(), 500);
+        });
+    }, 5000);
+</script>
+{% endblock %}

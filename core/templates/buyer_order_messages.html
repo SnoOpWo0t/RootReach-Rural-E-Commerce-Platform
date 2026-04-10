@@ -1,0 +1,997 @@
+{% extends "base.html" %}
+
+{% block title %}RootReach - Buyer Order Messages{% endblock %}
+
+{% block extra_css %}
+<style>
+    .messages-container {
+        max-width: 1000px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+
+    .page-title {
+        font-size: 2.2rem;
+        color: #2c3e50;
+        margin-bottom: 2rem;
+        position: relative;
+        padding-bottom: 1rem;
+        text-align: center;
+    }
+
+    .page-title::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        bottom: 0;
+        height: 4px;
+        width: 80px;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, #4a90e2, #357abd);
+        border-radius: 2px;
+    }
+
+    /* Conversations List */
+    .conversations-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .conversation-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+
+    .conversation-card:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        border-color: #4a90e2;
+    }
+
+    /* Conversation Header (List Item) */
+    .conversation-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        cursor: pointer;
+        user-select: none;
+        background: linear-gradient(145deg, #f8fafc, #f1f5f9);
+        transition: background 0.3s ease;
+    }
+
+    .conversation-header:hover {
+        background: linear-gradient(145deg, #f1f5f9, #e2e8f0);
+    }
+
+    .conversation-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .conversation-title {
+        font-size: 1.1rem;
+        color: #2c3e50;
+        margin: 0 0 8px 0;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .conversation-title i {
+        color: #4a90e2;
+    }
+
+    .conversation-preview {
+        margin: 5px 0;
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    .message-count {
+        font-weight: 600;
+        color: #4a90e2;
+    }
+
+    .separator {
+        margin: 0 8px;
+        color: #cbd5e1;
+    }
+
+    .latest-time {
+        color: #94a3b8;
+        font-size: 0.85rem;
+    }
+
+    .latest-message-text {
+        margin: 8px 0 0 0;
+        color: #64748b;
+        font-size: 0.95rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .conversation-toggle {
+        margin-left: 20px;
+        color: #4a90e2;
+        font-size: 1.2rem;
+        transition: transform 0.3s ease;
+    }
+
+    .conversation-card.expanded .conversation-toggle {
+        transform: rotate(180deg);
+    }
+
+    /* Conversation Details/Expanded View */
+    .conversation-detail {
+        padding: 25px;
+        border-top: 2px solid #e2e8f0;
+        background: white;
+    }
+
+    .conversation-meta {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+        padding: 15px;
+        background: linear-gradient(145deg, #f8fafc, #f1f5f9);
+        border-radius: 8px;
+    }
+
+    .meta-item {
+        font-size: 0.95rem;
+        color: #64748b;
+    }
+
+    .meta-item strong {
+        color: #2c3e50;
+        display: block;
+        margin-bottom: 3px;
+    }
+
+    /* Message Thread Display */
+    .message-thread {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-bottom: 30px;
+        max-height: 500px;
+        overflow-y: auto;
+        padding: 20px;
+        background: linear-gradient(145deg, #fafbfc, #f1f5f9);
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .message-box {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .message-sender {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        min-width: 60px;
+    }
+
+    .buyer-icon {
+        font-size: 1.8rem;
+        color: #4a90e2;
+    }
+
+    .seller-icon {
+        font-size: 1.8rem;
+        color: #10b981;
+    }
+
+    .sender-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 4px;
+        white-space: nowrap;
+    }
+
+    .buyer-label {
+        background: rgba(74, 144, 226, 0.15);
+        color: #4a90e2;
+    }
+
+    .seller-label {
+        background: rgba(16, 185, 129, 0.15);
+        color: #10b981;
+    }
+
+    .message-content {
+        flex: 1;
+        background: white;
+        padding: 12px 15px;
+        border-radius: 8px;
+        border-left: 4px solid #4a90e2;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .message-box.from-seller .message-content {
+        border-left-color: #10b981;
+        background: linear-gradient(145deg, #f0fdf4, #f1fdf5);
+    }
+
+    .message-text {
+        color: #1e293b;
+        line-height: 1.6;
+        margin-bottom: 8px;
+        word-wrap: break-word;
+    }
+
+    .message-time {
+        font-size: 0.8rem;
+        color: #94a3b8;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    /* Reply Section */
+    .reply-section {
+        background: linear-gradient(145deg, #f8fafc, #f1f5f9);
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        border: 2px solid #e2e8f0;
+    }
+
+    .reply-section h4 {
+        font-size: 1rem;
+        color: #2c3e50;
+        margin: 0 0 15px 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+    }
+
+    .reply-section h4 i {
+        color: #4a90e2;
+    }
+
+    .reply-section textarea {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e2e8f0;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        font-family: inherit;
+        resize: vertical;
+        min-height: 100px;
+        transition: all 0.3s ease;
+    }
+
+    .reply-section textarea:focus {
+        outline: none;
+        border-color: #4a90e2;
+        box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+    }
+
+    .reply-section button {
+        padding: 10px 20px;
+        background: linear-gradient(135deg, #4a90e2, #357abd);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .reply-section button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(74, 144, 226, 0.4);
+    }
+
+    .delete-conversation-btn {
+        width: 100%;
+        padding: 12px;
+        background: rgba(220, 38, 38, 0.1);
+        color: #dc2626;
+        border: 2px solid #fca5a5;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .delete-conversation-btn:hover {
+        background: #dc2626;
+        color: white;
+        border-color: #dc2626;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 80px 20px;
+        background: linear-gradient(145deg, #f8fafc, #f1f5f9);
+        border-radius: 15px;
+        border: 2px dashed #4a90e2;
+    }
+
+    .empty-state p {
+        font-size: 1.2rem;
+        color: #64748b;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .empty-state i {
+        color: #4a90e2;
+        font-size: 2rem;
+    }
+
+    /* Scrollbar styling */
+    .message-thread::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .message-thread::-webkit-scrollbar-track {
+        background: #e2e8f0;
+        border-radius: 10px;
+    }
+
+    .message-thread::-webkit-scrollbar-thumb {
+        background: #4a90e2;
+        border-radius: 10px;
+    }
+
+    .message-thread::-webkit-scrollbar-thumb:hover {
+        background: #357abd;
+    }
+
+    @media (max-width: 768px) {
+        .messages-container {
+            padding: 0 15px;
+        }
+
+        .conversation-header {
+            padding: 15px;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .conversation-toggle {
+            margin-left: 0;
+            margin-top: 10px;
+        }
+
+        .conversation-meta {
+            grid-template-columns: 1fr;
+        }
+
+        .message-thread {
+            max-height: 300px;
+            padding: 15px;
+        }
+
+        .message-sender {
+            min-width: 45px;
+        }
+
+        .sender-label {
+            font-size: 0.7rem;
+        }
+
+        .message-content {
+            padding: 10px 12px;
+        }
+
+        .reply-section {
+            padding: 15px;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+        }
+    }
+        gap: 15px;
+        align-items: center;
+    }
+
+    .product-meta span {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .product-meta i {
+        color: #4a90e2;
+    }
+
+    .message-thread {
+        max-height: 400px;
+        overflow-y: auto;
+        padding: 20px 0;
+        margin-bottom: 25px;
+        scrollbar-width: thin;
+        scrollbar-color: #4a90e2 #f1f5f9;
+    }
+
+    .message-thread::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .message-thread::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 3px;
+    }
+
+    .message-thread::-webkit-scrollbar-thumb {
+        background: #4a90e2;
+        border-radius: 3px;
+    }
+
+    .message-box {
+        padding: 15px 20px;
+        border-radius: 12px;
+        margin-bottom: 15px;
+        position: relative;
+        max-width: 85%;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+
+    .message-box.sender {
+        margin-left: auto;
+        background: linear-gradient(145deg, #4a90e2, #357abd);
+        color: white;
+    }
+
+    .message-box.receiver {
+        margin-right: auto;
+        background: linear-gradient(145deg, #f1f5f9, #e2e8f0);
+        color: #1e293b;
+    }
+
+    .message-meta {
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .sender .message-meta {
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .receiver .message-meta {
+        color: #64748b;
+    }
+
+    .message-text {
+        line-height: 1.5;
+        font-size: 1rem;
+    }
+
+    .reply-form {
+        background: linear-gradient(145deg, #f8fafc, #f1f5f9);
+        padding: 25px;
+        border-radius: 12px;
+        margin-top: 25px;
+        border: 2px solid rgba(74, 144, 226, 0.1);
+    }
+
+    .reply-form h4 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .reply-form h4 i {
+        color: #4a90e2;
+    }
+
+    .reply-form textarea {
+        width: 100%;
+        padding: 15px;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        font-size: 1rem;
+        resize: vertical;
+        min-height: 100px;
+        transition: all 0.3s ease;
+        background-color: white;
+    }
+
+    .reply-form textarea:focus {
+        outline: none;
+        border-color: #4a90e2;
+        box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+    }
+
+    .reply-form button {
+        padding: 12px 30px;
+        background: linear-gradient(135deg, #4a90e2, #357abd);
+        color: white;
+        font-size: 1rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    .reply-form button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(74, 144, 226, 0.4);
+    }
+
+    .reply-form button i {
+        font-size: 1.1rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 80px 20px;
+        background: linear-gradient(145deg, #f8fafc, #f1f5f9);
+        border-radius: 15px;
+        margin: 40px 0;
+        border: 2px dashed rgba(74, 144, 226, 0.2);
+    }
+
+    .empty-state p {
+        font-size: 1.2rem;
+        color: #64748b;
+        margin-bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .empty-state i {
+        color: #4a90e2;
+        font-size: 1.4rem;
+    }
+
+    @media (max-width: 768px) {
+        .messages-container {
+            padding: 0 15px;
+        }
+
+        .message-box {
+            max-width: 95%;
+        }
+
+        .product-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .product-info {
+            margin-bottom: 15px;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="messages-container">
+    <h2 class="page-title"><i class="fas fa-comments"></i> Messages for Your Orders</h2>
+
+    {% if conversations %}
+        <div class="conversations-list">
+            {% for conv in conversations %}
+                <div class="conversation-card" data-product-id="{{ conv.product.id }}">
+                    <!-- Conversation Summary/Preview -->
+                    <div class="conversation-header" onclick="toggleConversation({{ conv.product.id }})">
+                        <div class="conversation-info">
+                            <h3 class="conversation-title">
+                                <i class="fas fa-box"></i> {{ conv.product.name }}
+                            </h3>
+                            <p class="conversation-preview">
+                                <span class="message-count">{{ conv.message_count }} message{{ conv.message_count|pluralize }}</span>
+                                <span class="separator">•</span>
+                                <span class="latest-time">{{ conv.latest_timestamp|date:"M d, Y H:i" }}</span>
+                            </p>
+                            <p class="latest-message-text">
+                                <strong>Latest:</strong> {{ conv.latest_message }}{% if conv.latest_message|length >= 100 %}...{% endif %}
+                            </p>
+                        </div>
+                        <div class="conversation-toggle">
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+
+                    <!-- Expanded Conversation View -->
+                    <div class="conversation-detail" id="detail-{{ conv.product.id }}" style="display: none;">
+                        <div class="conversation-meta">
+                            <div class="meta-item">
+                                <strong>Seller:</strong> {{ conv.seller_name }}
+                            </div>
+                            <div class="meta-item">
+                                <strong>Price:</strong> ৳{{ conv.product.discounted_price|default:conv.product.price }}
+                            </div>
+                            <div class="meta-item">
+                                <strong>Stock:</strong> {{ conv.product.stock }} available
+                            </div>
+                        </div>
+
+                        <div class="message-thread">
+                            {% for msg_info in conv.messages %}
+                                <div class="message-box {% if msg_info.is_from_seller %}from-seller{% else %}from-buyer{% endif %}">
+                                    <div class="message-sender">
+                                        {% if msg_info.is_from_seller %}
+                                            <i class="fas fa-store seller-icon"></i>
+                                            <span class="sender-label seller-label">{{ conv.seller_name }}</span>
+                                        {% else %}
+                                            <i class="fas fa-user-circle buyer-icon"></i>
+                                            <span class="sender-label buyer-label">You</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="message-content">
+                                        <div class="message-text">{{ msg_info.message.message }}</div>
+                                        <div class="message-time">
+                                            <i class="far fa-clock"></i> {{ msg_info.message.timestamp|date:"M d, Y H:i" }}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="reply-section">
+                            <h4><i class="fas fa-reply"></i> Reply to {{ conv.seller_name }}</h4>
+                            <form action="{% url 'buyer_reply_to_message' conv.product.id %}" method="POST">
+                                {% csrf_token %}
+                                <textarea name="reply" placeholder="Type your message here..." required></textarea>
+                                <button type="submit">
+                                    <i class="fas fa-paper-plane"></i> Send Message
+                                </button>
+                            </form>
+                        </div>
+
+                        <button type="button" class="delete-conversation-btn" onclick="deleteBuyerMessages({{ conv.product.id }})">
+                            <i class="fas fa-trash-alt"></i> Delete Conversation
+                        </button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <p><i class="fas fa-inbox"></i> You don't have any messages yet.</p>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    // Toggle conversation detail view
+    function toggleConversation(productId) {
+        const card = document.querySelector(`[data-product-id="${productId}"]`);
+        const detail = document.getElementById(`detail-${productId}`);
+        const header = card.querySelector('.conversation-header');
+        
+        if (detail.style.display === 'none') {
+            detail.style.display = 'block';
+            card.classList.add('expanded');
+            // Smooth scroll to the card
+            header.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
+            detail.style.display = 'none';
+            card.classList.remove('expanded');
+        }
+    }
+
+    // Helper function to get CSRF token from cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Delete Buyer Messages Function
+    function deleteBuyerMessages(productId) {
+        if (!confirm('Are you sure you want to delete this entire conversation? This action cannot be undone.')) {
+            return;
+        }
+
+        const deleteUrl = `{% url 'delete_buyer_messages' 0 %}`.replace('0', productId);
+        const csrftoken = getCookie('csrftoken');
+        
+        fetch(deleteUrl, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({})
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Find and remove the message section
+                const messageSection = document.querySelector(`[data-product-id="${productId}"]`);
+                if (messageSection) {
+                    messageSection.style.animation = 'fadeOut 0.3s ease-out forwards';
+                    setTimeout(() => {
+                        messageSection.remove();
+                        
+                        // Check if there are any message sections left
+                        const messageSections = document.querySelectorAll('.message-section');
+                        if (messageSections.length === 0) {
+                            location.reload(); // Reload to show empty state
+                        }
+                    }, 300);
+                }
+                
+                // Show success notification
+                showNotification(
+                    'Success',
+                    `Deleted ${data.deleted_count} message(s) from this conversation`,
+                    'success',
+                    5000
+                );
+            } else {
+                alert('Error: ' + (data.message || 'Failed to delete messages'));
+            }
+        })
+        .catch(error => {
+            console.error('Delete error:', error);
+            alert('Error deleting messages: ' + error.message);
+        });
+    }
+
+    // Notification Function
+    function showNotification(title, message, type = 'info', duration = 5000) {
+        // Create notification container if it doesn't exist
+        let container = document.querySelector('.notification-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.className = 'notification-container';
+            document.body.appendChild(container);
+        }
+
+        const toast = document.createElement('div');
+        toast.className = `notification-toast ${type}`;
+
+        const icons = {
+            success: '<i class="fas fa-check-circle"></i>',
+            info: '<i class="fas fa-info-circle"></i>',
+            warning: '<i class="fas fa-exclamation-circle"></i>',
+            error: '<i class="fas fa-times-circle"></i>'
+        };
+
+        toast.innerHTML = `
+            <div class="notification-icon">${icons[type] || icons.info}</div>
+            <div class="notification-content">
+                <p class="notification-title">${title}</p>
+                <p class="notification-message">${message}</p>
+            </div>
+            <button class="notification-close" onclick="this.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+
+        container.appendChild(toast);
+
+        if (duration > 0) {
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.classList.add('removing');
+                    setTimeout(() => toast.remove(), 300);
+                }
+            }, duration);
+        }
+
+        return toast;
+    }
+
+    // Add fade out animation
+    const style = document.createElement('style');
+    style.textContent = `
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 400px;
+        }
+
+        .notification-toast {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            border-left: 5px solid;
+            animation: slideIn 0.3s ease-out;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+        }
+
+        .notification-toast.removing {
+            animation: slideOut 0.3s ease-in forwards;
+        }
+
+        .notification-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 700;
+            margin: 0 0 0.25rem 0;
+            color: #1f2937;
+        }
+
+        .notification-message {
+            font-size: 0.9rem;
+            margin: 0;
+            color: #6b7280;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            cursor: pointer;
+            color: #9ca3af;
+            padding: 0;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .notification-close:hover {
+            color: #1f2937;
+        }
+
+        .notification-toast.success {
+            border-left-color: #10b981;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.02) 100%);
+        }
+
+        .notification-toast.success .notification-icon {
+            color: #10b981;
+        }
+
+        .notification-toast.success .notification-title {
+            color: #059669;
+        }
+
+        .notification-toast.info {
+            border-left-color: #3b82f6;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(59, 130, 246, 0.02) 100%);
+        }
+
+        .notification-toast.info .notification-icon {
+            color: #3b82f6;
+        }
+
+        .notification-toast.info .notification-title {
+            color: #1d4ed8;
+        }
+
+        .notification-toast.error {
+            border-left-color: #ef4444;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, rgba(239, 68, 68, 0.02) 100%);
+        }
+
+        .notification-toast.error .notification-icon {
+            color: #ef4444;
+        }
+
+        .notification-toast.error .notification-title {
+            color: #dc2626;
+        }
+
+        @media (max-width: 640px) {
+            .notification-container {
+                left: 10px;
+                right: 10px;
+                top: 10px;
+                max-width: none;
+            }
+
+            .notification-toast {
+                max-width: 100%;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+{% endblock %}

@@ -1,0 +1,515 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="view-transition" content="same-origin" />
+    <title>{% block title %}RootReach{% endblock %}</title>
+    
+    <!-- Tailwind CSS CDN with JIT -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0052cc',
+                        secondary: '#00a3bf',
+                        accent: '#ffd700',
+                        'dark-bg': '#0a0e27',
+                        'dark-secondary': '#151b3d',
+                        'dark-tertiary': '#1a1f4d',
+                    },
+                    backdropBlur: { xs: '2px' },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
+                        'pulse-glow': 'pulseGlow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        pulseGlow: {
+                            '0%, 100%': { boxShadow: '0 0 0 0 rgba(0, 82, 204, 0.7)' },
+                            '50%': { boxShadow: '0 0 0 10px rgba(0, 82, 204, 0)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            },
+            darkMode: 'class' // Enable Tailwind dark mode with class strategy
+        }
+    </script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    {% block extra_css %}{% endblock %}
+    
+    <style>
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* ======================== */
+        /* VIEW TRANSITIONS API */
+        /* ======================== */
+        @supports (view-transition-name: auto) {
+            ::view-transition-old(root) {
+                animation: slide-out-left 0.4s cubic-bezier(0.4, 0, 1, 1);
+            }
+            
+            ::view-transition-new(root) {
+                animation: slide-in-right 0.4s cubic-bezier(0, 0, 0.2, 1);
+            }
+        }
+
+        @keyframes slide-out-left {
+            from { opacity: 1; transform: translateX(0); }
+            to { opacity: 0; transform: translateX(-30px); }
+        }
+
+        @keyframes slide-in-right {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* ======================== */
+        /* GLASSMORPHISM UTILITIES */
+        /* ======================== */
+        .glass {
+            @apply bg-white/15 backdrop-blur-lg border border-white/20 rounded-xl;
+        }
+
+        .glass-dark {
+            @apply bg-slate-900/40 backdrop-blur-lg border border-cyan-500/20 rounded-lg shadow-lg shadow-cyan-500/10;
+        }
+
+        .glass-card {
+            @apply bg-white/15 backdrop-blur-lg border border-white/20 rounded-xl shadow-lg hover:shadow-2xl hover:border-white/30 transition-all duration-300;
+        }
+
+        [data-theme="dark"] .glass {
+            @apply bg-slate-950/40 border-cyan-500/15;
+        }
+
+        [data-theme="dark"] .glass-card {
+            @apply bg-gradient-to-br from-slate-900/50 to-slate-950/40 border border-cyan-500/15 shadow-lg shadow-cyan-500/10;
+        }
+
+        [data-theme="dark"] .glass-card:hover {
+            @apply shadow-2xl shadow-cyan-500/20 border-cyan-500/30 bg-gradient-to-br from-slate-900/60 to-slate-950/50;
+        }
+
+        /* ======================== */
+        /* SMOOTH TRANSITIONS */
+        /* ======================== */
+        * {
+            @apply transition-colors duration-300 transition-shadows duration-300;
+        }
+
+        [data-theme="dark"] body {
+            @apply bg-gradient-to-br from-dark-bg via-dark-secondary to-dark-tertiary text-slate-100;
+        }
+
+        body {
+            @apply transition-all duration-300 bg-white text-slate-900;
+        }
+
+        /* ======================== */
+        /* HEADER & NAV ANIMATIONS */
+        /* ======================== */
+        .nav-item-animate {
+            @apply transition-all duration-300 ease-out;
+        }
+
+        .nav-item-animate:hover {
+            @apply transform -translate-y-1;
+        }
+
+        .search-input-focus {
+            @apply transition-all duration-200;
+        }
+
+        .search-input-focus:focus {
+            @apply ring-2 ring-primary/50;
+        }
+
+        /* ======================== */
+        /* PROFILE BUTTON ANIMATION */
+        /* ======================== */
+        .profile-picture {
+            @apply w-8 h-8 rounded-full border-2 border-accent object-cover shadow-md transition-transform duration-300 hover:scale-110;
+        }
+    </style>
+</head>
+
+<body class="bg-white text-slate-900 transition-all duration-300" data-theme="light">
+    <!-- Header Navigation -->
+    <header class="sticky top-0 z-50 w-full glass border-b border-white/20 dark:from-slate-900/90 dark:to-slate-950/80">
+        <nav class="max-w-7xl mx-auto px-4 md:px-6">
+            <!-- Main Navbar -->
+            <div class="flex items-center justify-between py-3 md:py-4">
+                <!-- Logo -->
+                <a href="{% url 'home' %}" class="flex items-center gap-2 group">
+                    <span class="text-2xl md:text-3xl font-bold">
+                        🌿 <span class="text-slate-900 dark:text-slate-100 group-hover:text-primary transition-colors">Root</span><span class="text-accent">Reach</span>
+                    </span>
+                </a>
+
+                <!-- Center Navigation -->
+                <div class="hidden lg:flex items-center gap-1">
+                    {% if user.is_authenticated %}
+                        {% if user.is_superuser %}
+                            <a href="{% url 'seller_requests' %}" class="nav-item-animate px-4 py-2 rounded-full text-white hover:bg-white/20 flex items-center gap-2">
+                                <i class="fas fa-user-shield"></i>
+                                <span class="hidden xl:inline">Seller Requests</span>
+                            </a>
+                        {% endif %}
+                        {% if user.is_seller %}
+                            <a href="{% url 'sell_zone' %}" class="nav-item-animate px-4 py-2 rounded-full text-white hover:bg-white/20 flex items-center gap-2">
+                                <i class="fas fa-store"></i>
+                                <span class="hidden xl:inline">Sell</span>
+                            </a>
+                        {% endif %}
+                        <a href="{% url 'order_tracking' %}" class="nav-item-animate px-4 py-2 rounded-full text-white hover:bg-white/20 flex items-center gap-2">
+                            <i class="fas fa-box"></i>
+                            <span class="hidden xl:inline">Orders</span>
+                        </a>
+                        <a href="{% url 'cart' %}" class="nav-item-animate relative px-4 py-2 rounded-full text-white hover:bg-white/20 flex items-center gap-2">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="hidden xl:inline">Cart</span>
+                            {% if cart_item_count > 0 %}
+                                <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{{ cart_item_count }}</span>
+                            {% endif %}
+                        </a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="nav-item-animate px-4 py-2 rounded-full text-white hover:bg-white/20 flex items-center gap-2">
+                            <i class="fas fa-sign-in-alt"></i>
+                            <span>Login</span>
+                        </a>
+                        <a href="{% url 'register' %}" class="nav-item-animate px-4 py-2 rounded-full text-white hover:bg-white/20 flex items-center gap-2">
+                            <i class="fas fa-user-plus"></i>
+                            <span>Sign Up</span>
+                        </a>
+                    {% endif %}
+                </div>
+
+                <!-- Right Section -->
+                <div class="flex items-center gap-3">
+                    <!-- Search Form -->
+                    <form method="get" action="{% url 'search_products' %}" class="hidden md:flex gap-2 glass px-3 py-2 rounded-full">
+                        <input type="text" name="q" placeholder="Search..." class="search-input-focus bg-transparent outline-none text-white placeholder-white/60 w-px md:w-40 lg:w-48">
+                        <button type="submit" class="text-accent hover:text-accent/80 transition-colors">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+
+                    <!-- Theme Toggle -->
+                    <button id="themeToggle" onclick="toggleTheme()" class="nav-item-animate px-4 py-2 rounded-full glass text-white hover:bg-white/30 flex items-center gap-2" title="Toggle dark mode">
+                        <i class="fas fa-moon"></i>
+                        <span class="hidden md:inline text-sm">Dark</span>
+                    </button>
+
+                    <!-- Profile Dropdown -->
+                    {% if user.is_authenticated %}
+                        <div class="relative group">
+                            <button onclick="toggleProfileDropdown()" class="nav-item-animate flex items-center gap-2 px-3 py-2 rounded-full hover:bg-white/20 transition-all duration-300">
+                                {% if user.profile_image %}
+                                    <img src="{{ user.profile_image.url }}" alt="Profile" class="profile-picture">
+                                {% else %}
+                                    <div class="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center text-accent">
+                                        <i class="fas fa-user text-sm"></i>
+                                    </div>
+                                {% endif %}
+                                <i class="fas fa-chevron-down text-xs text-white transition-transform duration-300"></i>
+                            </button>
+
+                            <!-- Dropdown Menu -->
+                            <div id="profileDropdown" class="absolute right-0 mt-2 w-48 glass rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform origin-top scale-95 group-hover:scale-100 shadow-2xl">
+                                <a href="{% url 'profile' %}" class="block px-4 py-3 text-slate-900 dark:text-white hover:bg-primary/10 dark:hover:bg-cyan-500/10 rounded-t-xl transition-colors flex items-center gap-2">
+                                    <i class="fas fa-user"></i> Profile
+                                </a>
+                                <div class="border-t border-white/20"></div>
+                                <a href="{% url 'logout' %}" onclick="return confirm('Logout?')" class="block px-4 py-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-b-xl transition-colors flex items-center gap-2">
+                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Mobile Search (only on small screens) -->
+            <form method="get" action="{% url 'search_products' %}" class="md:hidden mb-3 glass px-3 py-2 rounded-full flex gap-2">
+                <input type="text" name="q" placeholder="Search products..." class="search-input-focus bg-transparent outline-none text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 flex-1">
+                <button type="submit" class="text-primary dark:text-cyan-400 hover:text-primary/80">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </nav>
+    </header>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="hidden fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center backdrop-blur-sm">
+        <div class="animate-spin">
+            <div class="w-12 h-12 border-4 border-white/30 border-t-primary rounded-full"></div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="min-h-screen">
+        <div class="max-w-7xl mx-auto">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-16 pt-12 pb-6 bg-gradient-to-r from-primary/20 to-secondary/20 dark:from-slate-950 dark:to-slate-900 border-t border-white/10 dark:border-cyan-500/10">
+        <div class="max-w-7xl mx-auto px-4 md:px-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+                <!-- About Section -->
+                <div class="space-y-4 animate-fade-in">
+                    <h3 class="text-xl font-bold gap-2 flex items-center">
+                        <span class="text-slate-900 dark:text-white">Root</span>
+                        <span class="text-accent">Reach</span>
+                    </h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+                        Connecting buyers with trusted sellers. Your one-stop shop for quality products.
+                    </p>
+                    <div class="flex gap-4 text-primary dark:text-cyan-400">
+                        <a href="#" class="hover:text-accent transition-colors"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="hover:text-accent transition-colors"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="hover:text-accent transition-colors"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="hover:text-accent transition-colors"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="space-y-4 animate-fade-in" style="animation-delay: 0.1s">
+                    <h4 class="font-bold text-slate-900 dark:text-white">Quick Links</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="{% url 'home' %}" class="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-cyan-400 transition-colors">Home</a></li>
+                        <li><a href="#" class="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-cyan-400 transition-colors">Products</a></li>
+                        <li><a href="{% url 'about' %}" class="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-cyan-400 transition-colors">About Us</a></li>
+                    </ul>
+                </div>
+
+                <!-- Support -->
+                <div class="space-y-4 animate-fade-in" style="animation-delay: 0.2s">
+                    <h4 class="font-bold text-slate-900 dark:text-white">Support</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="{% url 'all_policies' %}" class="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-cyan-400 transition-colors">All Policies</a></li>
+                        <li><a href="{% url 'terms_conditions' %}" class="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-cyan-400 transition-colors">Terms & Conditions</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact -->
+                <div class="space-y-4 animate-fade-in" style="animation-delay: 0.3s">
+                    <h4 class="font-bold text-slate-900 dark:text-white">Contact</h4>
+                    <div class="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+                        <p class="flex items-center gap-2"><i class="fas fa-map-marker-alt"></i> Jessore, Khulna</p>
+                        <p class="flex items-center gap-2"><i class="fas fa-phone"></i> +880175749956</p>
+                        <p class="flex items-center gap-2"><i class="fas fa-envelope"></i> <a href="mailto:support@rootreach.com" class="hover:text-primary">support@rootreach.com</a></p>
+                        <a href="{% url 'apply_seller_status' %}" class="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-accent text-slate-900 font-semibold rounded-full hover:bg-accent/90 hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                            <i class="fa-solid fa-shop"></i> Become a Seller
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Bottom -->
+            <div class="pt-6 border-t border-white/10 dark:border-cyan-500/10 text-center text-sm text-slate-600 dark:text-slate-400">
+                <p>© 2025 RootReach. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating Chatbot Button -->
+    <div id="floatingChatbot" class="fixed bottom-6 right-6 z-40">
+        <!-- Chat Button -->
+        <button id="chatbotBtn" onclick="toggleChatbot()" class="flex items-center justify-center w-16 h-16 bg-gradient-to-r from-primary to-secondary rounded-full text-white shadow-lg hover:shadow-2xl hover:scale-110 transition-all duration-300 animate-pulse-glow">
+            <i class="fas fa-comments text-xl"></i>
+            <span class="absolute top-0 right-0 bg-red-500 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white">AI</span>
+        </button>
+
+        <!-- Chat Panel -->
+        <div id="chatPanel" class="absolute bottom-24 right-0 w-80 h-96 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl flex flex-col opacity-0 invisible scale-95 transform origin-bottom-right transition-all duration-300">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-primary to-secondary text-white p-4 rounded-t-2xl flex items-center justify-between">
+                <h3 class="font-bold flex items-center gap-2"><i class="fas fa-robot"></i> Shopping Assistant</h3>
+                <button onclick="toggleChatbot()" class="text-xl hover:rotate-90 transition-transform">&times;</button>
+            </div>
+
+            <!-- Messages -->
+            <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50 dark:bg-slate-950/50">
+                <div class="bg-primary/10 dark:bg-cyan-500/10 text-slate-900 dark:text-slate-100 p-3 rounded-lg text-sm">
+                    👋 Hi! I'm here to help you find great products. What are you looking for?
+                </div>
+            </div>
+
+            <!-- Input -->
+            <div class="border-t border-slate-200 dark:border-slate-800 p-3 flex gap-2">
+                <input type="text" id="chatInput" placeholder="Ask anything..." class="flex-1 px-3 py-2 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg outline-none focus:ring-2 focus:ring-primary dark:focus:ring-cyan-500">
+                <button onclick="sendMessage()" class="bg-primary hover:bg-primary/90 text-white p-2 rounded-lg transition-colors">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{% static 'js/scripts.js' %}"></script>
+    <script>
+        // ========================
+        // THEME TOGGLE
+        // ========================
+        function initTheme() {
+            const html = document.documentElement;
+            const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            
+            html.setAttribute('data-theme', savedTheme);
+            if (savedTheme === 'dark') {
+                html.classList.add('dark');
+            }
+        }
+
+        window.toggleTheme = function() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            if (newTheme === 'dark') {
+                html.classList.add('dark');
+            } else {
+                html.classList.remove('dark');
+            }
+            
+            document.dispatchEvent(new CustomEvent('themechange', { detail: { theme: newTheme } }));
+        };
+
+        document.addEventListener('DOMContentLoaded', initTheme);
+
+        // ========================
+        // PROFILE DROPDOWN
+        // ========================
+        function toggleProfileDropdown() {
+            const dropdown = document.getElementById('profileDropdown');
+            dropdown?.classList.toggle('hidden');
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.relative') && !e.target.closest('button')) {
+                document.getElementById('profileDropdown')?.classList.add('hidden');
+            }
+        });
+
+        // ========================
+        // CHATBOT
+        // ========================
+        function toggleChatbot() {
+            const panel = document.getElementById('chatPanel');
+            const btn = document.getElementById('chatbotBtn');
+            
+            panel.classList.toggle('opacity-0');
+            panel.classList.toggle('invisible');
+            panel.classList.toggle('scale-95');
+            panel.classList.toggle('opacity-100');
+            panel.classList.toggle('visible');
+            panel.classList.toggle('scale-100');
+            
+            if (!panel.classList.contains('invisible')) {
+                document.getElementById('chatInput').focus();
+            }
+        }
+
+        window.sendMessage = function() {
+            const input = document.getElementById('chatInput');
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            const messages = document.getElementById('chatMessages');
+            
+            // User message
+            const userDiv = document.createElement('div');
+            userDiv.className = 'bg-primary text-white p-3 rounded-lg text-sm ml-8 animate-slide-up';
+            userDiv.textContent = msg;
+            messages.appendChild(userDiv);
+            input.value = '';
+
+            // AI response
+            setTimeout(() => {
+                const aiDiv = document.createElement('div');
+                aiDiv.className = 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white p-3 rounded-lg text-sm mr-8 animate-slide-up';
+                aiDiv.innerHTML = '🤖 <strong>AI:</strong> How can I help you find the perfect product?';
+                messages.appendChild(aiDiv);
+                messages.scrollTop = messages.scrollHeight;
+            }, 300);
+
+            messages.scrollTop = messages.scrollHeight;
+        };
+
+        document.getElementById('chatInput')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        // ========================
+        // VIEW TRANSITIONS API
+        // ========================
+        if (document.startViewTransition) {
+            document.addEventListener('click', async (e) => {
+                const link = e.target.closest('a');
+                if (!link || link.target === '_blank' || link.hasAttribute('download') || 
+                    link.href.startsWith('javascript:') || link.href.startsWith('mailto:') || 
+                    link.href.startsWith('tel:') || link.href.startsWith('#')) {
+                    return;
+                }
+
+                try {
+                    const linkURL = new URL(link.href, window.location.origin);
+                    if (linkURL.origin !== window.location.origin) return;
+                } catch {
+                    return;
+                }
+
+                e.preventDefault();
+                await document.startViewTransition(() => {
+                    window.location.href = link.href;
+                }).ready;
+            });
+        }
+
+        // ========================
+        // BECOME SELLER AUTH CHECK
+        // ========================
+        document.addEventListener('DOMContentLoaded', () => {
+            const sellerBtn = document.querySelector('.become-seller-btn');
+            if (sellerBtn && "{{ user.is_authenticated|lower }}" !== 'true') {
+                sellerBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    alert('Please log in to become a seller');
+                    window.location.href = "{% url 'login' %}?next={% url 'apply_seller_status' %}";
+                });
+            }
+        });
+    </script>
+</body>
+</html>

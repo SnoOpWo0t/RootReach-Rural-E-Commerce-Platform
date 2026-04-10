@@ -1,0 +1,186 @@
+<!-- AI Message Suggestions Component -->
+<!-- Include this in product_chat.html or buyer_order_messages.html templates -->
+
+<div id="ai-suggestions-container" class="ai-suggestions" style="display: none; margin-top: 15px; padding: 12px; background: #f0f7ff; border-left: 4px solid #0052cc; border-radius: 6px;">
+    <div style="font-size: 0.85rem; color: #0052cc; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+        <span>🤖</span>
+        <strong>AI Suggestions:</strong>
+    </div>
+    <div id="suggestions-list" style="display: flex; flex-direction: column; gap: 8px;">
+        <!-- Suggestions will be inserted here by JavaScript -->
+    </div>
+</div>
+
+<style>
+    .ai-suggestions {
+        animation: slideIn 0.3s ease-out;
+    }
+    
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .suggestion-item {
+        padding: 8px 12px;
+        background: white;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border-left: 2px solid #0052cc;
+        font-size: 0.9rem;
+    }
+    
+    .suggestion-item:hover {
+        background: #e3f2fd;
+        transform: translateX(4px);
+    }
+    
+    .suggestion-item:active {
+        background: #bbdefb;
+    }
+</style>
+
+<script>
+/**
+ * AI Message Suggestions System
+ * Displays smart suggestions for responding to messages
+ */
+
+class AIMessageSuggestions {
+    constructor(options = {}) {
+        this.apiEndpoint = options.apiEndpoint || '/api/message-suggestions/';
+        this.messageInputSelector = options.messageInputSelector || 'textarea[name="message"]';
+        this.suggestionContainerSelector = options.suggestionContainerSelector || '#ai-suggestions-container';
+        this.suggestionListSelector = options.suggestionListSelector || '#suggestions-list';
+        this.productId = options.productId || null;
+        this.debounceDelay = options.debounceDelay || 500;
+        this.debounceTimer = null;
+        
+        this.init();
+    }
+    
+    init() {
+        const messageInput = document.querySelector(this.messageInputSelector);
+        if (!messageInput) return;
+        
+        // Show suggestions on focus and input
+        messageInput.addEventListener('focus', () => this.showSuggestions());
+        messageInput.addEventListener('input', () => this.debounceSuggestions());
+        
+        // Initially hide suggestions
+        this.hideSuggestions();
+    }
+    
+    debounceSuggestions() {
+        clearTimeout(this.debounceTimer);
+        this.debounceTimer = setTimeout(() => this.showSuggestions(), this.debounceDelay);
+    }
+    
+    async showSuggestions() {
+        const messageInput = document.querySelector(this.messageInputSelector);
+        const message = messageInput?.value?.trim() || '';
+        
+        // Don't show suggestions for empty or very short messages
+        if (!message || message.length < 2) {
+            this.hideSuggestions();
+            return;
+        }
+        
+        try {
+            const response = await fetch(this.apiEndpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': this.getCSRFToken(),
+                },
+                body: JSON.stringify({
+                    message: message,
+                    product_id: this.productId
+                })
+            });
+            
+            if (!response.ok) {
+                console.error('Failed to fetch suggestions:', response.status);
+                return;
+            }
+            
+            const data = await response.json();
+            if (data.success && data.suggestions && data.suggestions.length > 0) {
+                this.displaySuggestions(data.suggestions);
+            } else {
+                this.hideSuggestions();
+            }
+        } catch (error) {
+            console.error('Error fetching suggestions:', error);
+        }
+    }
+    
+    displaySuggestions(suggestions) {
+        const container = document.querySelector(this.suggestionContainerSelector);
+        const list = document.querySelector(this.suggestionListSelector);
+        
+        if (!container || !list) return;
+        
+        // Clear previous suggestions
+        list.innerHTML = '';
+        
+        // Add new suggestions
+        suggestions.slice(0, 3).forEach((suggestion, index) => {
+            const item = document.createElement('div');
+            item.className = 'suggestion-item';
+            item.textContent = suggestion;
+            item.onclick = () => this.insertSuggestion(suggestion);
+            item.title = 'Click to insert suggestion';
+            item.style.animationDelay = `${index * 50}ms`;
+            list.appendChild(item);
+        });
+        
+        // Show container
+        container.style.display = 'block';
+    }
+    
+    hideSuggestions() {
+        const container = document.querySelector(this.suggestionContainerSelector);
+        if (container) {
+            container.style.display = 'none';
+        }
+    }
+    
+    insertSuggestion(suggestion) {
+        const messageInput = document.querySelector(this.messageInputSelector);
+        if (messageInput) {
+            messageInput.value = suggestion;
+            messageInput.focus();
+            // Trigger form update if needed
+            messageInput.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+        this.hideSuggestions();
+    }
+    
+    getCSRFToken() {
+        // Get CSRF token from cookie or meta tag
+        const token = document.querySelector('input[name="csrfmiddlewaretoken"]')?.value ||
+                     document.querySelector('meta[name="csrf-token"]')?.content;
+        return token || '';
+    }
+}
+
+// Initialize on document ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Get product ID from page context if available
+    const productId = document.querySelector('[data-product-id]')?.dataset.productId;
+    
+    new AIMessageSuggestions({
+        apiEndpoint: '/api/message-suggestions/',
+        messageInputSelector: 'textarea[name="message"]',
+        productId: productId ? parseInt(productId) : null
+    });
+});
+</script>

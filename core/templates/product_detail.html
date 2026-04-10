@@ -1,0 +1,980 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}RootReach - {{ product.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Product Detail Container */
+    .product-detail-container {
+        margin: 40px 0;
+        display: grid;
+        grid-template-columns: minmax(300px, 40%) 1fr;
+        gap: 40px;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* Product Image Section */
+    .product-image-section {
+        position: relative;
+    }
+
+    .product-image {
+        width: 100%;
+        height: auto;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Product Info Section */
+    .product-info {
+        padding: 0 20px;
+    }
+
+    .product-title {
+        font-size: 2rem;
+        color: var(--text-primary);
+        margin-bottom: 20px;
+        line-height: 1.3;
+    }
+
+    .price-section {
+        margin: 20px 0;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .original-price {
+        text-decoration: line-through;
+        color: #999;
+        font-size: 1.1rem;
+    }
+
+    .discounted-price {
+        font-size: 1.8rem;
+        color: #e74c3c;
+        font-weight: 600;
+    }
+
+    .regular-price {
+        font-size: 1.8rem;
+        color: var(--text-dark);
+        font-weight: 600;
+    }
+
+    .stock-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        margin: 10px 0;
+    }
+
+    .in-stock {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+    }
+
+    .out-of-stock {
+        background-color: #ffebee;
+        color: #c62828;
+    }
+
+    .seller-info {
+        margin: 20px 0;
+        padding: 15px;
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    [data-theme="dark"] .seller-info {
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    .seller-info i {
+        font-size: 1.2rem;
+        color: var(--primary);
+    }
+
+    /* Product Actions */
+    .product-actions {
+        margin-top: 30px;
+        display: flex;
+        gap: 15px;
+    }
+
+    .product-actions .btn {
+        padding: 12px 25px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+    }
+
+    /* Tabs Section */
+    .product-tabs {
+        grid-column: 1 / -1;
+        margin-top: 40px;
+    }
+
+    .tabs-header {
+        display: flex;
+        gap: 0;
+        border-bottom: none;
+        margin-bottom: 40px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.08);
+        padding: 8px;
+        width: fit-content;
+    }
+
+    .tab-button {
+        padding: 12px 24px;
+        background: none;
+        border: none;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        cursor: pointer;
+        position: relative;
+        transition: all 0.3s ease;
+        border-radius: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .tab-button:hover {
+        background: rgba(0, 82, 204, 0.1);
+        color: var(--primary);
+    }
+
+    .tab-button.active {
+        color: white;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        box-shadow: 0 4px 12px rgba(0, 82, 204, 0.3);
+    }
+
+    .tab-button.active::after {
+        display: none;
+    }
+
+    .tab-content {
+        display: none;
+        padding: 30px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        animation: fadeInTab 0.3s ease;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    @keyframes fadeInTab {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Description Tab Styling */
+    .description-content {
+        color: var(--text-primary);
+        line-height: 1.8;
+        font-size: 1.05rem;
+    }
+
+    .description-content p {
+        margin-bottom: 20px;
+        color: var(--text-secondary);
+    }
+
+    .description-content ul,
+    .description-content ol {
+        margin: 20px 0 20px 30px;
+        color: var(--text-secondary);
+    }
+
+    .description-content li {
+        margin-bottom: 12px;
+        line-height: 1.8;
+    }
+
+    .description-content strong {
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+
+    /* Specifications Table */
+    .specifications-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin: 0;
+    }
+
+    .specifications-table thead {
+        background: linear-gradient(135deg, rgba(0, 82, 204, 0.15), rgba(0, 163, 191, 0.15));
+        border-bottom: none;
+    }
+
+    .specifications-table th {
+        padding: 18px;
+        text-align: left;
+        font-weight: 600;
+        color: var(--primary);
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid rgba(0, 82, 204, 0.2);
+    }
+
+    .specifications-table tbody tr {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .specifications-table tbody tr:hover {
+        background: rgba(0, 82, 204, 0.08);
+    }
+
+    .specifications-table tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    .specifications-table td {
+        padding: 18px;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+    }
+
+    .specifications-table td:first-child {
+        font-weight: 600;
+        color: var(--primary);
+        min-width: 200px;
+        background: rgba(0, 82, 204, 0.05);
+    }
+
+    .spec-value {
+        color: var(--text-secondary);
+    }
+
+    /* Reviews Section */
+    .reviews-section {
+        margin-top: 0;
+    }
+
+    .review-stats {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        gap: 40px;
+        margin-bottom: 40px;
+        padding: 30px;
+        background: linear-gradient(135deg, rgba(0, 82, 204, 0.1), rgba(0, 163, 191, 0.08));
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-radius: 16px;
+        border: 1px solid rgba(0, 82, 204, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    }
+
+    .average-rating {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .average-rating .rating-number {
+        font-size: 4rem;
+        font-weight: 700;
+        color: var(--primary);
+        line-height: 1;
+        margin-bottom: 10px;
+    }
+
+    .rating-stars {
+        color: #ffc107;
+        font-size: 1.3rem;
+        margin: 10px 0;
+        letter-spacing: 2px;
+    }
+
+    .rating-count {
+        color: var(--text-secondary);
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+
+    .review-stats-details {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .review-stat-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+    }
+
+    .review-stat-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 80px;
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    .review-stat-bar {
+        flex: 1;
+        height: 8px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .review-stat-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #ffc107, #ff9800);
+        border-radius: 10px;
+    }
+
+    .review-stat-count {
+        color: var(--text-primary);
+        font-weight: 600;
+        min-width: 40px;
+        text-align: right;
+    }
+
+    .review-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 20px;
+    }
+
+    .review-item {
+        padding: 24px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        display: grid;
+        gap: 15px;
+        transition: all 0.3s ease;
+    }
+
+    .review-item:hover {
+        background: rgba(255, 255, 255, 0.12);
+        border-color: rgba(0, 82, 204, 0.3);
+        box-shadow: 0 8px 24px rgba(0, 82, 204, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .reviewer-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .reviewer-name {
+        font-weight: 600;
+        color: var(--primary);
+        font-size: 0.95rem;
+    }
+
+    .reviewer-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+    }
+
+    .review-date {
+        color: var(--text-tertiary);
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .review-content {
+        color: var(--text-primary);
+        line-height: 1.7;
+        font-size: 0.95rem;
+        padding: 12px;
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        border-left: 3px solid var(--primary);
+    }
+
+    .review-image {
+        max-width: 150px;
+        height: auto;
+        border-radius: 8px;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .review-image:hover {
+        transform: scale(1.05);
+        border-color: rgba(0, 82, 204, 0.3);
+    }
+
+    /* AI Sentiment Analysis Badges */
+    .sentiment-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        margin-left: 8px;
+    }
+
+    .sentiment-positive {
+        background: linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(56, 142, 60, 0.15));
+        color: #2e7d32;
+        border: 1px solid rgba(76, 175, 80, 0.5);
+    }
+
+    .sentiment-negative {
+        background: linear-gradient(135deg, rgba(244, 67, 54, 0.2), rgba(211, 47, 47, 0.15));
+        color: #c62828;
+        border: 1px solid rgba(244, 67, 54, 0.5);
+    }
+
+    .sentiment-neutral {
+        background: linear-gradient(135deg, rgba(158, 158, 158, 0.2), rgba(117, 117, 117, 0.15));
+        color: #424242;
+        border: 1px solid rgba(158, 158, 158, 0.5);
+    }
+
+    .ai-summary {
+        background: linear-gradient(135deg, rgba(255, 193, 7, 0.12), rgba(76, 175, 80, 0.08));
+        border-left: 4px solid #ffc107;
+        padding: 16px;
+        margin-top: 12px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        color: var(--text-primary);
+        display: none;
+        border: 1px solid rgba(255, 193, 7, 0.2);
+    }
+
+    .ai-summary.show {
+        display: block;
+        animation: slideInDown 0.3s ease;
+    }
+
+    @keyframes slideInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .ai-summary-toggle {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        cursor: pointer;
+        margin-top: 8px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    .ai-summary-toggle:hover {
+        color: #ffc107;
+    }
+
+    /* Review Form */
+    .review-form {
+        margin-top: 40px;
+        background: linear-gradient(135deg, rgba(0, 82, 204, 0.08), rgba(0, 163, 191, 0.06));
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        padding: 30px;
+        border-radius: 16px;
+        border: 1px solid rgba(0, 82, 204, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    }
+
+    .review-form h4 {
+        margin-bottom: 25px;
+        color: var(--text-primary);
+        font-size: 1.3rem;
+        font-weight: 600;
+    }
+
+    .star-rating {
+        font-size: 36px;
+        color: #ddd;
+        cursor: pointer;
+        display: flex;
+        gap: 12px;
+        margin-bottom: 25px;
+    }
+
+    .star-rating .fa-star {
+        transition: all 0.2s ease;
+    }
+
+    .star-rating .fa-star:hover,
+    .star-rating .fa-star.filled {
+        color: #ffc107;
+        text-shadow: 0 0 8px rgba(255, 193, 7, 0.5);
+        transform: scale(1.1);
+    }
+
+    .form-group {
+        margin-bottom: 22px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 10px;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background: rgba(0, 0, 0, 0.2);
+        color: var(--text-primary);
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .form-control::placeholder {
+        color: var(--text-tertiary);
+    }
+
+    .form-control:focus {
+        border-color: var(--primary);
+        outline: none;
+        background: rgba(0, 0, 0, 0.1);
+        box-shadow: 0 0 0 3px rgba(0, 82, 204, 0.1);
+    }
+
+    .review-form .btn {
+        padding: 14px 32px;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    @media (max-width: 768px) {
+        .product-detail-container {
+            grid-template-columns: 1fr;
+        }
+
+        .product-info {
+            padding: 0;
+        }
+
+        .review-stats {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .tabs-header {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .tab-content {
+            padding: 20px;
+        }
+
+        .review-form {
+            padding: 20px;
+        }
+
+        .star-rating {
+            font-size: 28px;
+            gap: 8px;
+        }
+
+        .average-rating .rating-number {
+            font-size: 3rem;
+        }
+
+        .review-item {
+            padding: 16px;
+        }
+
+        .review-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .specifications-table {
+            font-size: 0.9rem;
+        }
+
+        .specifications-table th,
+        .specifications-table td {
+            padding: 12px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="product-detail-container">
+        <!-- Product Image -->
+        <div class="product-image-section">
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image">
+        </div>
+
+        <!-- Product Information -->
+        <div class="product-info">
+            <h1 class="product-title">{{ product.name }}</h1>
+
+            <div class="price-section">
+                {% if product.discounted_price and product.discounted_price < product.price %}
+                    <span class="original-price">৳{{ product.price }}</span>
+                    <span class="discounted-price">৳{{ product.discounted_price }}</span>
+                {% else %}
+                    <span class="regular-price">৳{{ product.price }}</span>
+                {% endif %}
+            </div>
+
+            <div class="stock-badge {% if product.stock > 0 %}in-stock{% else %}out-of-stock{% endif %}">
+                <i class="fas {% if product.stock > 0 %}fa-check-circle{% else %}fa-times-circle{% endif %}"></i>
+                {% if product.stock > 0 %}In Stock{% else %}Out of Stock{% endif %}
+            </div>
+
+            <div class="seller-info">
+                <div>
+                    <i class="fas fa-user"></i>
+                    <strong>Seller:</strong> {{ product.seller.username }}
+                </div>
+                <div>
+                    <i class="fas fa-map-marker-alt"></i>
+                    <strong>Region:</strong> {{ product.region }}
+                </div>
+            </div>
+
+            <div class="product-actions">
+                {% if product.stock > 0 and product.seller != user %}
+                    <button class="btn btn-primary add-to-cart" data-product-id="{{ product.id }}" data-is-authenticated="{{ user.is_authenticated|yesno:'true,false' }}">
+                        <i class="fas fa-shopping-cart"></i>
+                        Add to Cart
+                    </button>
+                {% endif %}
+                {% if product.seller != user %}
+                    <a href="{% url 'product_chat' product.id %}" class="btn btn-outline chat-with-seller" data-is-authenticated="{{ user.is_authenticated|yesno:'true,false' }}">
+                        <i class="fas fa-comment"></i>
+                        Chat with Seller
+                    </a>
+                    <a href="{% url 'add_to_comparison' product.id %}" class="btn btn-outline" title="Add to comparison">
+                        <i class="fas fa-balance-scale"></i>
+                        <span class="compare-text">Compare</span>
+                    </a>
+                {% endif %}
+            </div>
+            
+            <!-- Comparison Counter -->
+            <div style="margin-top: 15px; padding: 12px; background: rgba(100, 100, 100, 0.1); border-radius: 8px; text-align: center;">
+                <a href="{% url 'compare_products' %}" style="color: var(--primary); text-decoration: none; font-weight: 500;">
+                    <i class="fas fa-balance-scale"></i>
+                    <span id="compare-count">
+                        {% if 'compare_products' in request.session %}
+                            {{ request.session.compare_products|length}}
+                        {% else %}
+                            0
+                        {% endif %}
+                    </span>
+                    / 2 Products in Comparison
+                </a>
+            </div>
+        </div>
+
+        <!-- Tabbed Content -->
+        <div class="product-tabs">
+            <div class="tabs-header">
+                <button class="tab-button active" data-tab="description">Description</button>
+                <button class="tab-button" data-tab="specifications">Specifications</button>
+                <button class="tab-button" data-tab="reviews">Reviews ({{ reviews.count }})</button>
+            </div>
+
+            <!-- Description Tab -->
+            <div id="description" class="tab-content active">
+                <div class="description-content">
+                    {{ product.description|linebreaks }}
+                </div>
+            </div>
+
+            <!-- Specifications Tab -->
+            <div id="specifications" class="tab-content">
+                <table class="specifications-table">
+                    <!-- Add your specifications here -->
+                </table>
+            </div>
+
+            <!-- Reviews Tab -->
+            <div id="reviews" class="tab-content">
+                <div class="reviews-section">
+                    <div class="review-stats">
+                        <div class="average-rating">
+                            <div class="rating-number">{{ product.avg_rating|default:"0.0" }}</div>
+                            <div class="rating-stars">
+                                {% with avg_rating=product.avg_rating|default:0 %}
+                                    {% for i in "12345" %}
+                                        {% if forloop.counter <= avg_rating %}★{% else %}☆{% endif %}
+                                    {% endfor %}
+                                {% endwith %}
+                            </div>
+                            <div class="rating-count">{{ reviews.count|default:"0" }} Reviews</div>
+                        </div>
+                        
+                        <div class="review-stats-details">
+                            {% for rating_num in rating_choices %}
+                                {% with count=rating_counts|dict_lookup:rating_num %}
+                                    <div class="review-stat-item">
+                                        <div class="review-stat-label">
+                                            <span>{{ rating_num }}</span>
+                                            <span style="color: #ffc107;">★</span>
+                                        </div>
+                                        <div class="review-stat-bar">
+                                            <div class="review-stat-fill" style="width: {% if max_count > 0 %}{{ count|percentage:max_count }}%{% else %}0%{% endif %};"></div>
+                                        </div>
+                                        <div class="review-stat-count">{{ count }}</div>
+                                    </div>
+                                {% endwith %}
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <ul class="review-list">
+                        {% for review in reviews %}
+                            <li class="review-item">
+                                <div class="review-header">
+                                    <div class="reviewer-info">
+                                        <div class="reviewer-avatar">{{ review.reviewer.username|first|upper }}</div>
+                                        <span class="reviewer-name">{{ review.reviewer.username }}</span>
+                                        <div class="rating-stars">
+                                            {% for i in "12345" %}
+                                                {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}
+                                            {% endfor %}
+                                        </div>
+                                        <!-- AI Sentiment Badge -->
+                                        {% if review.rating >= 4 %}
+                                            <span class="sentiment-badge sentiment-positive">✅ Positive</span>
+                                        {% elif review.rating <= 2 %}
+                                            <span class="sentiment-badge sentiment-negative">⚠️ Negative</span>
+                                        {% else %}
+                                            <span class="sentiment-badge sentiment-neutral">➖ Neutral</span>
+                                        {% endif %}
+                                    </div>
+                                    <span class="review-date">{{ review.created_at|date:"M d, Y" }}</span>
+                                </div>
+                                <div class="review-content">{{ review.comment }}</div>
+                                {% if review.image %}
+                                    <img src="{{ review.image.url }}" alt="Review Image" class="review-image">
+                                {% endif %}
+                                <!-- AI Summary (Optional) -->
+                                <div class="ai-summary-toggle" onclick="toggleReviewSummary(this)">
+                                    <i class="fas fa-lightbulb" style="color: #ffc107;"></i> Show AI Summary
+                                </div>
+                                <div class="ai-summary">
+                                    {% if review.rating >= 4 %}
+                                        <strong>✅ Summary:</strong> Customer very satisfied with product quality and seller service.
+                                    {% elif review.rating <= 2 %}
+                                        <strong>⚠️ Summary:</strong> Customer experienced issues with product or service. Seller may need to follow up.
+                                    {% else %}
+                                        <strong>➖ Summary:</strong> Customer found product acceptable with some minor concerns.
+                                    {% endif %}
+                                </div>
+                            </li>
+                        {% empty %}
+                            <li style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                                <i class="fas fa-comments" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.3;"></i>
+                                <p>No reviews yet. Be the first to review this product!</p>
+                            </li>
+                        {% endfor %}
+                    </ul>
+
+                    {% if user.is_authenticated and user != product.seller %}
+                        <div class="review-form">
+                            <h4>Write a Review</h4>
+                            <form method="POST" enctype="multipart/form-data" action="{% url 'submit_review' product.id %}">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <label>Rating</label>
+                                    <div class="star-rating" id="star-rating">
+                                        {% for i in "12345" %}
+                                            <i class="fa fa-star" data-value="{{ forloop.counter }}"></i>
+                                        {% endfor %}
+                                    </div>
+                                    <input type="hidden" name="rating" id="id_rating" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="id_comment">Your Review</label>
+                                    {{ review_form.comment }}
+                                </div>
+                                <div class="form-group">
+                                    <label for="id_image">Add Photos (Optional)</label>
+                                    {{ review_form.image }}
+                                </div>
+                                <button type="submit" class="btn btn-primary">Submit Review</button>
+                            </form>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Tab functionality
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all buttons and contents
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+
+                // Add active class to clicked button and corresponding content
+                button.classList.add('active');
+                const tabId = button.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // Add to Cart functionality
+        const addToCartBtn = document.querySelector('.add-to-cart');
+        if (addToCartBtn) {
+            addToCartBtn.addEventListener('click', function(e) {
+                if (this.dataset.isAuthenticated !== 'true') {
+                    e.preventDefault();
+                    alert("Please sign in to add items to your cart.");
+                    window.location.href = "{% url 'login' %}";
+                    return;
+                }
+                window.location.href = "{% url 'add_to_cart' product.id %}";
+            });
+        }
+
+        // Chat with Seller functionality
+        const chatBtn = document.querySelector('.chat-with-seller');
+        if (chatBtn) {
+            chatBtn.addEventListener('click', function(e) {
+                if (this.dataset.isAuthenticated !== 'true') {
+                    e.preventDefault();
+                    alert("Please sign in to chat with the seller.");
+                    window.location.href = "{% url 'login' %}";
+                    return;
+                }
+            });
+        }
+
+        // Rating stars functionality
+        const stars = document.querySelectorAll('.star-rating .fa-star');
+        const hiddenInput = document.getElementById('id_rating');
+
+        stars.forEach((star, index) => {
+            star.addEventListener('click', function() {
+                const rating = index + 1;
+                hiddenInput.value = rating;
+                updateStars(rating);
+            });
+
+            star.addEventListener('mouseover', function() {
+                updateStars(index + 1);
+            });
+
+            star.addEventListener('mouseout', function() {
+                const currentRating = parseInt(hiddenInput.value) || 0;
+                updateStars(currentRating);
+            });
+        });
+
+        function updateStars(rating) {
+            stars.forEach((s, i) => {
+                s.classList.toggle('filled', i < rating);
+            });
+        }
+
+        // If form re-renders after error, restore rating
+        const currentRating = parseInt(hiddenInput.value);
+        if (currentRating) {
+            updateStars(currentRating);
+        }
+    });
+
+    // Toggle AI Summary
+    function toggleReviewSummary(element) {
+        const summary = element.nextElementSibling;
+        if (summary && summary.classList.contains('ai-summary')) {
+            summary.classList.toggle('show');
+            if (summary.classList.contains('show')) {
+                element.innerHTML = '<i class="fas fa-lightbulb" style="color: #ffc107;"></i> Hide AI Summary';
+            } else {
+                element.innerHTML = '<i class="fas fa-lightbulb" style="color: #ffc107;"></i> Show AI Summary';
+            }
+        }
+    }
+</script>
+{% endblock %}

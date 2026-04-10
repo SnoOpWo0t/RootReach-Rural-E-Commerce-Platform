@@ -1,0 +1,817 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admin Dashboard - RootReach{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard-container">
+    <!-- Hero Header -->
+    <div class="admin-header-section">
+        <div class="container-fluid px-4">
+            <div class="admin-header-content">
+                <div class="admin-header-text">
+                    <h1 class="admin-title">Admin Dashboard</h1>
+                    <p class="admin-subtitle">Welcome back, <span class="admin-username">{{ user.username }}</span>! Manage all platform operations.</p>
+                </div>
+                <a href="{% url 'home' %}" class="admin-btn-home">
+                    <i class="fas fa-arrow-left"></i> Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid px-4 py-5">
+        <!-- Statistics Cards -->
+        <div class="stats-grid">
+            <!-- Users Card -->
+            <div class="stat-card stat-card-users">
+                <div class="stat-card-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-card-content">
+                    <h6 class="stat-label">Total Users</h6>
+                    <h2 class="stat-number">{{ total_users }}</h2>
+                    <p class="stat-meta">
+                        <span class="stat-meta-buyers">{{ total_buyers }} Buyers</span>
+                        <span class="stat-meta-sep">•</span>
+                        <span class="stat-meta-sellers">{{ total_sellers }} Sellers</span>
+                    </p>
+                </div>
+                <a href="{% url 'admin_users' %}" class="stat-card-link">View Details</a>
+            </div>
+
+            <!-- Products Card -->
+            <div class="stat-card stat-card-products">
+                <div class="stat-card-icon">
+                    <i class="fas fa-box"></i>
+                </div>
+                <div class="stat-card-content">
+                    <h6 class="stat-label">Total Products</h6>
+                    <h2 class="stat-number">{{ total_products }}</h2>
+                    <p class="stat-meta">
+                        <span class="stat-alert">{{ out_of_stock }} Out of Stock</span>
+                    </p>
+                </div>
+                <a href="{% url 'admin_products' %}" class="stat-card-link">View Details</a>
+            </div>
+
+            <!-- Orders Card -->
+            <div class="stat-card stat-card-orders">
+                <div class="stat-card-icon">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <div class="stat-card-content">
+                    <h6 class="stat-label">Total Orders</h6>
+                    <h2 class="stat-number">{{ total_orders }}</h2>
+                    <p class="stat-meta">
+                        <span class="stat-pending">{{ pending_orders }} Pending</span>
+                    </p>
+                </div>
+                <a href="{% url 'admin_orders' %}" class="stat-card-link">View Details</a>
+            </div>
+
+            <!-- Reviews Card -->
+            <div class="stat-card stat-card-reviews">
+                <div class="stat-card-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="stat-card-content">
+                    <h6 class="stat-label">Total Reviews</h6>
+                    <h2 class="stat-number">{{ total_reviews }}</h2>
+                    <p class="stat-meta">
+                        <span class="stat-moderation">Moderation Available</span>
+                    </p>
+                </div>
+                <a href="{% url 'admin_reviews' %}" class="stat-card-link">View Details</a>
+            </div>
+        </div>
+
+        <!-- Seller Applications & Quick Actions -->
+        <div class="action-section mt-5">
+            <div class="action-grid">
+                <!-- Seller Applications Card -->
+                <div class="action-card action-card-primary">
+                    <div class="action-card-header">
+                        <i class="fas fa-store"></i>
+                        <h5>Pending Seller Applications</h5>
+                    </div>
+                    <div class="action-card-body">
+                        <div class="action-number">{{ pending_seller_applications }}</div>
+                        <p class="action-description">Applications waiting for review</p>
+                    </div>
+                    <a href="{% url 'admin_seller_applications' %}" class="action-btn">Review Applications</a>
+                </div>
+
+                <!-- Quick Access -->
+                <div class="action-card action-card-secondary">
+                    <div class="action-card-header">
+                        <i class="fas fa-bolt"></i>
+                        <h5>Quick Access</h5>
+                    </div>
+                    <div class="action-card-body">
+                        <div class="quick-links-grid">
+                            <a href="{% url 'admin_users' %}" class="quick-link">
+                                <i class="fas fa-users"></i>
+                                <span>Manage Users</span>
+                            </a>
+                            <a href="{% url 'admin_users_by_location' %}" class="quick-link">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>Users by Division</span>
+                            </a>
+                            <a href="{% url 'admin_products' %}" class="quick-link">
+                                <i class="fas fa-box"></i>
+                                <span>Manage Products</span>
+                            </a>
+                            <a href="{% url 'admin_orders' %}" class="quick-link">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span>Manage Orders</span>
+                            </a>
+                            <a href="{% url 'admin_reviews' %}" class="quick-link">
+                                <i class="fas fa-star"></i>
+                                <span>Moderate Reviews</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity Section -->
+        <div class="activity-section mt-5">
+            <div class="activity-grid">
+                <!-- Recent Orders -->
+                <div class="activity-card">
+                    <div class="activity-header">
+                        <div class="activity-title">
+                            <i class="fas fa-clock"></i>
+                            <h5>Recent Orders</h5>
+                        </div>
+                    </div>
+                    <div class="activity-content">
+                        {% if recent_orders %}
+                            <div class="activity-list">
+                                {% for order in recent_orders %}
+                                <div class="activity-item">
+                                    <div class="activity-item-info">
+                                        <div class="activity-item-title">
+                                            <a href="{% url 'admin_order_details' order.id %}" class="activity-link">#{{ order.id }}</a>
+                                            <span class="activity-item-user">{{ order.buyer.username }}</span>
+                                        </div>
+                                        <div class="activity-item-meta">{{ order.ordered_at|date:"M d, Y H:i" }}</div>
+                                    </div>
+                                    <div class="activity-item-status">
+                                        <span class="status-badge status-{% if order.status == 'pending' %}warning{% elif order.status == 'delivered' %}success{% elif order.status == 'cancelled' %}danger{% else %}info{% endif %}">
+                                            {{ order.get_status_display }}
+                                        </span>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="fas fa-inbox"></i>
+                                <p>No orders yet</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Recent Reviews -->
+                <div class="activity-card">
+                    <div class="activity-header">
+                        <div class="activity-title">
+                            <i class="fas fa-comments"></i>
+                            <h5>Recent Reviews</h5>
+                        </div>
+                    </div>
+                    <div class="activity-content">
+                        {% if recent_reviews %}
+                            <div class="activity-list">
+                                {% for review in recent_reviews %}
+                                <div class="activity-item">
+                                    <div class="activity-item-info">
+                                        <div class="activity-item-title">
+                                            <span class="activity-product">{{ review.product.name|truncatewords:3 }}</span>
+                                            <span class="activity-item-user">{{ review.reviewer.username }}</span>
+                                        </div>
+                                        <div class="activity-item-rating">
+                                            {% for i in "x"|rjust:"5" %}
+                                                {% if forloop.counter <= review.rating %}<i class="fas fa-star"></i>{% else %}<i class="far fa-star"></i>{% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="fas fa-inbox"></i>
+                                <p>No reviews yet</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Dashboard Container */
+    .admin-dashboard-container {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        padding-bottom: 4rem;
+    }
+
+    /* Header Section */
+    .admin-header-section {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        padding: 3rem 0;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .admin-header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 2rem;
+    }
+
+    .admin-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #ffffff;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.5px;
+    }
+
+    .admin-subtitle {
+        font-size: 1.1rem;
+        color: rgba(255, 255, 255, 0.85);
+        margin: 0;
+    }
+
+    .admin-username {
+        font-weight: 600;
+        color: #4da6ff;
+    }
+
+    .admin-btn-home {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.75rem;
+        background: rgba(255, 255, 255, 0.15);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50px;
+        color: white;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(10px);
+    }
+
+    .admin-btn-home:hover {
+        background: rgba(255, 255, 255, 0.25);
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        color: white;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    /* Stat Cards Base */
+    .stat-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        position: relative;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--stat-color);
+        animation: expandWidth 0.6s ease-out;
+    }
+
+    @keyframes expandWidth {
+        from {
+            width: 0;
+        }
+        to {
+            width: 100%;
+        }
+    }
+
+    .stat-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+    }
+
+    .stat-card-users { --stat-color: #667eea; }
+    .stat-card-products { --stat-color: #f093fb; }
+    .stat-card-orders { --stat-color: #4facfe; }
+    .stat-card-reviews { --stat-color: #fa709a; }
+
+    .stat-card-icon {
+        width: 70px;
+        height: 70px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        margin-bottom: 1.5rem;
+        background: rgba(102, 126, 234, 0.1);
+        color: var(--stat-color);
+        animation: slideInDown 0.6s ease-out;
+    }
+
+    .stat-card-users .stat-card-icon { background: rgba(102, 126, 234, 0.1); color: #667eea; }
+    .stat-card-products .stat-card-icon { background: rgba(240, 147, 251, 0.1); color: #f093fb; }
+    .stat-card-orders .stat-card-icon { background: rgba(79, 172, 254, 0.1); color: #4facfe; }
+    .stat-card-reviews .stat-card-icon { background: rgba(250, 112, 154, 0.1); color: #fa709a; }
+
+    @keyframes slideInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .stat-card-content {
+        margin-bottom: 1.5rem;
+    }
+
+    .stat-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #9ca3af;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #1f2937;
+        margin: 0;
+        line-height: 1;
+    }
+
+    .stat-meta {
+        font-size: 0.875rem;
+        color: #6b7280;
+        margin: 0.75rem 0 0 0;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .stat-meta-sep { color: #d1d5db; }
+    .stat-meta-buyers { color: #10b981; }
+    .stat-meta-sellers { color: #f59e0b; }
+    .stat-alert { color: #ef4444; }
+    .stat-pending { color: #f59e0b; }
+    .stat-moderation { color: #0891b2; }
+
+    .stat-card-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--stat-color);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card-link:hover {
+        gap: 0.75rem;
+        color: var(--stat-color);
+    }
+
+    /* Action Section */
+    .action-section {
+        margin-top: 3rem;
+    }
+
+    .action-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+
+    .action-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .action-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+    }
+
+    .action-card-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .action-card-header i {
+        font-size: 1.75rem;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+    }
+
+    .action-card-secondary .action-card-header i {
+        background: rgba(240, 147, 251, 0.1);
+        color: #f093fb;
+    }
+
+    .action-card-header h5 {
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #1f2937;
+    }
+
+    .action-number {
+        font-size: 3rem;
+        font-weight: 800;
+        color: #667eea;
+        line-height: 1;
+        margin-bottom: 0.5rem;
+    }
+
+    .action-description {
+        color: #9ca3af;
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    .quick-links-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .quick-link {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1.25rem;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        border-radius: 12px;
+        text-decoration: none;
+        color: #1f2937;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+    .quick-link i {
+        font-size: 1.5rem;
+        width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: white;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .quick-link:hover {
+        border-color: #667eea;
+        background: rgba(102, 126, 234, 0.05);
+        transform: translateY(-4px);
+    }
+
+    .quick-link:hover i {
+        background: #667eea;
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .action-btn {
+        display: inline-block;
+        margin-top: 1.5rem;
+        padding: 0.875rem 1.75rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+
+    /* Activity Section */
+    .activity-section {
+        margin-top: 3rem;
+    }
+
+    .activity-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2rem;
+    }
+
+    .activity-card {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .activity-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+    }
+
+    .activity-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 1.5rem 2rem;
+    }
+
+    .activity-title {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        color: white;
+    }
+
+    .activity-title i {
+        font-size: 1.5rem;
+    }
+
+    .activity-title h5 {
+        margin: 0;
+        font-size: 1.15rem;
+        font-weight: 700;
+    }
+
+    .activity-content {
+        padding: 1.5rem 2rem;
+    }
+
+    .activity-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+
+    .activity-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 1.25rem;
+        border-bottom: 1px solid #e5e7eb;
+        transition: all 0.3s ease;
+    }
+
+    .activity-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .activity-item:hover {
+        background: rgba(102, 126, 234, 0.03);
+        margin: 0 -1rem;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+    }
+
+    .activity-item-info {
+        flex: 1;
+    }
+
+    .activity-item-title {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .activity-link {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 700;
+        transition: all 0.3s ease;
+    }
+
+    .activity-link:hover {
+        color: #764ba2;
+    }
+
+    .activity-item-user {
+        color: #9ca3af;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .activity-product {
+        color: #1f2937;
+        font-weight: 600;
+    }
+
+    .activity-item-meta {
+        font-size: 0.85rem;
+        color: #9ca3af;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .activity-item-rating {
+        color: #fbbf24;
+        font-size: 0.9rem;
+    }
+
+    .activity-item-status {
+        margin-left: 1rem;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .status-warning {
+        background: rgba(251, 191, 36, 0.15);
+        color: #d97706;
+    }
+
+    .status-success {
+        background: rgba(16, 185, 129, 0.15);
+        color: #059669;
+    }
+
+    .status-danger {
+        background: rgba(239, 68, 68, 0.15);
+        color: #dc2626;
+    }
+
+    .status-info {
+        background: rgba(59, 130, 246, 0.15);
+        color: #2563eb;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: #9ca3af;
+    }
+
+    .empty-state i {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .empty-state p {
+        margin: 0;
+        font-weight: 500;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .admin-header-content {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .admin-title {
+            font-size: 2rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .action-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .activity-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .quick-links-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .activity-item {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .activity-item-status {
+            margin-left: 0;
+            margin-top: 0.75rem;
+        }
+    }
+
+    /* Dark Mode Support */
+    [data-theme="dark"] .admin-dashboard-container {
+        background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+    }
+
+    [data-theme="dark"] .stat-card,
+    [data-theme="dark"] .action-card,
+    [data-theme="dark"] .activity-card {
+        background: #272f3f;
+        border-color: rgba(79, 172, 254, 0.1);
+    }
+
+    [data-theme="dark"] .stat-number,
+    [data-theme="dark"] .action-card-header h5,
+    [data-theme="dark"] .activity-item-title {
+        color: #f0f9ff;
+    }
+
+    [data-theme="dark"] .stat-label,
+    [data-theme="dark"] .stat-meta,
+    [data-theme="dark"] .action-description,
+    [data-theme="dark"] .activity-item-meta,
+    [data-theme="dark"] .activity-item-user {
+        color: #9ca3af;
+    }
+
+    [data-theme="dark"] .activity-item {
+        border-bottom-color: rgba(79, 172, 254, 0.1);
+    }
+
+    [data-theme="dark"] .quick-link {
+        background: rgba(79, 172, 254, 0.1);
+        color: #f0f9ff;
+        border-color: rgba(79, 172, 254, 0.2);
+    }
+
+    [data-theme="dark"] .quick-link i {
+        background: #374151;
+        color: #667eea;
+    }
+
+    [data-theme="dark"] .quick-link:hover {
+        background: rgba(102, 126, 234, 0.2);
+    }
+
+    [data-theme="dark"] .activity-item:hover {
+        background: rgba(102, 126, 234, 0.1);
+    }
+</style>
+{% endblock %}

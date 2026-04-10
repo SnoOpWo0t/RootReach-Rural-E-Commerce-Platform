@@ -1,0 +1,584 @@
+{% extends 'base.html' %}
+
+{% block title %}User Details - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="admin-detail-container">
+    <!-- Header -->
+    <div class="detail-header">
+        <div class="container-fluid px-4">
+            <div class="header-content">
+                <a href="{% url 'admin_users' %}" class="back-link">
+                    <i class="fas fa-arrow-left"></i> Back to Users
+                </a>
+                <div class="header-title">
+                    <h1>{{ user.username }}</h1>
+                    <p>User Profile & Activity</p>
+                </div>
+                <div class="user-status">
+                    <span class="status-badge {% if user.is_active %}active{% else %}inactive{% endif %}">
+                        {% if user.is_active %}Active{% else %}Inactive{% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="detail-content">
+        <div class="container-fluid px-4">
+            <div class="detail-grid">
+                <!-- Main Information -->
+                <div class="detail-main">
+                    <!-- User Info Card -->
+                    <div class="detail-card">
+                        <div class="detail-card-header">
+                            <h3>User Information</h3>
+                        </div>
+                        <div class="detail-card-body">
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <label>Username</label>
+                                    <p>{{ user.username }}</p>
+                                </div>
+                                <div class="info-item">
+                                    <label>Email</label>
+                                    <p>{{ user.email }}</p>
+                                </div>
+                                <div class="info-item">
+                                    <label>User Type</label>
+                                    <p>
+                                        <span class="badge-user-type badge-{% if user.user_type == 'admin' %}admin{% elif user.user_type == 'seller' %}seller{% else %}buyer{% endif %}">
+                                            {{ user.get_user_type_display }}
+                                        </span>
+                                    </p>
+                                </div>
+                                <div class="info-item">
+                                    <label>Phone</label>
+                                    <p>{{ user.phone|default:"Not provided" }}</p>
+                                </div>
+                                <div class="info-item">
+                                    <label>Location</label>
+                                    <p>{{ user.location|default:"Not provided" }}</p>
+                                </div>
+                                <div class="info-item">
+                                    <label>Gender</label>
+                                    <p>{{ user.get_gender_display|default:"Not provided" }}</p>
+                                </div>
+                                <div class="info-item">
+                                    <label>Address</label>
+                                    <p>{{ user.address|default:"Not provided" }}</p>
+                                </div>
+                                <div class="info-item">
+                                    <label>Seller Approved</label>
+                                    <p>
+                                        {% if user.is_seller_approved %}
+                                            <span class="badge-approval approved">Approved</span>
+                                        {% else %}
+                                            <span class="badge-approval pending">Not Approved</span>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Activity Card -->
+                    <div class="detail-card">
+                        <div class="detail-card-header">
+                            <h3>Platform Activity</h3>
+                        </div>
+                        <div class="activity-grid">
+                            <div class="activity-stat">
+                                <div class="activity-icon">
+                                    <i class="fas fa-shopping-cart"></i>
+                                </div>
+                                <div class="activity-info">
+                                    <div class="activity-number">{{ user_orders }}</div>
+                                    <div class="activity-label">Total Orders</div>
+                                </div>
+                            </div>
+                            <div class="activity-stat">
+                                <div class="activity-icon">
+                                    <i class="fas fa-box"></i>
+                                </div>
+                                <div class="activity-info">
+                                    <div class="activity-number">{{ user_products }}</div>
+                                    <div class="activity-label">Products Listed</div>
+                                </div>
+                            </div>
+                            <div class="activity-stat">
+                                <div class="activity-icon">
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <div class="activity-info">
+                                    <div class="activity-number">{{ user_reviews }}</div>
+                                    <div class="activity-label">Reviews Given</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timeline Card -->
+                    <div class="detail-card">
+                        <div class="detail-card-header">
+                            <h3>Account Timeline</h3>
+                        </div>
+                        <div class="timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-marker"></div>
+                                <div class="timeline-content">
+                                    <h5>Account Created</h5>
+                                    <p>{{ user.date_joined|date:"M d, Y - H:i" }}</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-marker"></div>
+                                <div class="timeline-content">
+                                    <h5>Last Login</h5>
+                                    <p>{{ user.last_login|date:"M d, Y - H:i"|default:"Never logged in" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="detail-sidebar">
+                    <!-- Actions Card -->
+                    <div class="detail-card">
+                        <div class="detail-card-header">
+                            <h3>Actions</h3>
+                        </div>
+                        <div class="action-list">
+                            {% if user.is_active %}
+                                <a href="{% url 'admin_deactivate_user' user.id %}" onclick="return confirm('Deactivate this user?')" class="action-btn action-btn-danger">
+                                    <i class="fas fa-ban"></i>
+                                    <span>Deactivate Account</span>
+                                </a>
+                            {% else %}
+                                <a href="{% url 'admin_activate_user' user.id %}" class="action-btn action-btn-success">
+                                    <i class="fas fa-check"></i>
+                                    <span>Activate Account</span>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Info Box -->
+                    <div class="detail-card info-box">
+                        <div class="info-box-item">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Account Status: {% if user.is_active %}<strong>Active</strong>{% else %}<strong>Inactive</strong>{% endif %}</span>
+                        </div>
+                        <div class="info-box-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Member Since: <strong>{{ user.date_joined|date:"M Y" }}</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .admin-detail-container {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        padding-bottom: 4rem;
+    }
+
+    /* Header */
+    .detail-header {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        padding: 2.5rem 0;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-content {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: rgba(255, 255, 255, 0.15);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        color: white;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .back-link:hover {
+        background: rgba(255, 255, 255, 0.25);
+        border-color: rgba(255, 255, 255, 0.4);
+        transform: translateX(-3px);
+        color: white;
+    }
+
+    .header-title {
+        flex: 1;
+    }
+
+    .header-title h1 {
+        color: white;
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 800;
+    }
+
+    .header-title p {
+        color: rgba(255, 255, 255, 0.8);
+        margin: 0.5rem 0 0 0;
+        font-size: 0.95rem;
+    }
+
+    .user-status {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .status-badge {
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+
+    .status-badge.active {
+        background: rgba(16, 185, 129, 0.2);
+        color: #10b981;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-badge.inactive {
+        background: rgba(239, 68, 68, 0.2);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    /* Content */
+    .detail-content {
+        padding: 3rem 0;
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 2rem;
+    }
+
+    .detail-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+    }
+
+    .detail-card:hover {
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+    }
+
+    .detail-card-header {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        padding: 1.5rem 2rem;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    .detail-card-header h3 {
+        margin: 0;
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #1f2937;
+    }
+
+    .detail-card-body {
+        padding: 2rem;
+    }
+
+    /* Info Grid */
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .info-item label {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-item p {
+        font-size: 1rem;
+        color: #1f2937;
+        margin: 0;
+        font-weight: 500;
+    }
+
+    /* Badge Styles */
+    .badge-user-type,
+    .badge-approval {
+        display: inline-block;
+        padding: 0.4rem 0.9rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .badge-admin {
+        background: rgba(239, 68, 68, 0.15);
+        color: #dc2626;
+    }
+
+    .badge-seller {
+        background: rgba(59, 130, 246, 0.15);
+        color: #2563eb;
+    }
+
+    .badge-buyer {
+        background: rgba(16, 185, 129, 0.15);
+        color: #059669;
+    }
+
+    .badge-approval.approved {
+        background: rgba(16, 185, 129, 0.15);
+        color: #059669;
+    }
+
+    .badge-approval.pending {
+        background: rgba(251, 191, 36, 0.15);
+        color: #d97706;
+    }
+
+    /* Activity Grid */
+    .activity-grid {
+        padding: 2rem;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+    }
+
+    .activity-stat {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .activity-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .activity-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .activity-number {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #1f2937;
+        line-height: 1;
+    }
+
+    .activity-label {
+        font-size: 0.85rem;
+        color: #9ca3af;
+        margin-top: 0.25rem;
+    }
+
+    /* Timeline */
+    .timeline {
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .timeline-item {
+        display: flex;
+        gap: 1.5rem;
+        align-items: flex-start;
+    }
+
+    .timeline-marker {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        margin-top: 4px;
+        flex-shrink: 0;
+    }
+
+    .timeline-content h5 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1f2937;
+    }
+
+    .timeline-content p {
+        margin: 0;
+        color: #9ca3af;
+        font-size: 0.9rem;
+    }
+
+    /* Action List */
+    .action-list {
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .action-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        text-align: center;
+        justify-content: center;
+    }
+
+    .action-btn-danger {
+        background: rgba(239, 68, 68, 0.1);
+        color: #dc2626;
+        border: 1.5px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .action-btn-danger:hover {
+        background: #dc2626;
+        color: white;
+        border-color: #dc2626;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .action-btn-success {
+        background: rgba(16, 185, 129, 0.1);
+        color: #059669;
+        border: 1.5px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .action-btn-success:hover {
+        background: #059669;
+        color: white;
+        border-color: #059669;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        transform: translateY(-2px);
+    }
+
+    /* Info Box */
+    .info-box {
+        padding: 0 !important;
+    }
+
+    .info-box-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid #e5e7eb;
+        color: #1f2937;
+        font-size: 0.95rem;
+    }
+
+    .info-box-item:last-child {
+        border-bottom: none;
+    }
+
+    .info-box-item i {
+        font-size: 1.2rem;
+        color: #667eea;
+    }
+
+    /* Sidebar */
+    .detail-sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    /* Dark Mode */
+    [data-theme="dark"] .detail-card {
+        background: #272f3f;
+        border-color: rgba(79, 172, 254, 0.1);
+    }
+
+    [data-theme="dark"] .detail-card-header {
+        background: rgba(79, 172, 254, 0.1);
+        border-bottom-color: rgba(79, 172, 254, 0.2);
+    }
+
+    [data-theme="dark"] .detail-card-header h3 {
+        color: #f0f9ff;
+    }
+
+    [data-theme="dark"] .info-item p,
+    [data-theme="dark"] .activity-number,
+    [data-theme="dark"] .timeline-content h5 {
+        color: #f0f9ff;
+    }
+
+    [data-theme="dark"] .info-box-item {
+        color: #f0f9ff;
+        border-bottom-color: rgba(79, 172, 254, 0.1);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .detail-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .header-content {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .activity-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}

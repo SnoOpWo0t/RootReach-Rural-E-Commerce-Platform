@@ -1,0 +1,22 @@
+🚀 For Amateurs - Simple Installation Commands:
+Complete setup in 7 steps:
+
+# 1. Create virtual environment
+python -m venv .venv
+
+# 2. Activate it (Windows)
+.venv\Scripts\activate
+
+# 3. Install dependencies
+pip install -r requirements.txt
+
+# 4. Set up database
+python manage.py migrate
+
+# 5. (Optional) Create admin user
+python manage.py createsuperuser
+
+# 6. Run server
+python manage.py runserver
+
+# 7. Open http://127.0.0.1:8000/ in browser

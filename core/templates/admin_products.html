@@ -1,0 +1,679 @@
+{% extends 'base.html' %}
+
+{% block title %}Product Management - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="admin-page-container">
+    <!-- Header Section -->
+    <div class="admin-page-header">
+        <div class="container-fluid px-4">
+            <div class="header-top">
+                <div class="header-title">
+                    <a href="{% url 'admin_dashboard' %}" class="back-link">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <div>
+                        <h1>Product Management</h1>
+                        <p>Manage all products and inventory</p>
+                    </div>
+                </div>
+                <div class="header-stats">
+                    <div class="stat-item">
+                        <span class="stat-value">{{ products|length }}</span>
+                        <span class="stat-label">Total Products</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">{{ out_of_stock }}</span>
+                        <span class="stat-label">Out of Stock</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-page-content">
+        <div class="container-fluid px-4">
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <div class="filter-card">
+                    <form method="get" action="" class="filter-form">
+                        <div class="filter-group">
+                            <div class="filter-item">
+                                <label for="category">Category</label>
+                                <select name="category" id="category" class="filter-select">
+                                    <option value="">All Categories</option>
+                                    {% for category in categories %}
+                                    <option value="{{ category.id }}" {% if category_filter|stringformat:"i" == category.id|stringformat:"i" %}selected{% endif %}>
+                                        {{ category.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="filter-item">
+                                <label for="status">Stock Status</label>
+                                <select name="status" id="status" class="filter-select">
+                                    <option value="">All</option>
+                                    <option value="in_stock" {% if status_filter == 'in_stock' %}selected{% endif %}>In Stock</option>
+                                    <option value="low_stock" {% if status_filter == 'low_stock' %}selected{% endif %}>Low Stock</option>
+                                    <option value="out_of_stock" {% if status_filter == 'out_of_stock' %}selected{% endif %}>Out of Stock</option>
+                                </select>
+                            </div>
+                            <div class="filter-item">
+                                <label for="search">Search</label>
+                                <input type="text" name="search" id="search" class="filter-input" placeholder="Product name..." value="{{ search }}">
+                            </div>
+                            <div class="filter-actions">
+                                <button type="submit" class="filter-btn filter-btn-primary">
+                                    <i class="fas fa-search"></i> Filter
+                                </button>
+                                <a href="{% url 'admin_products' %}" class="filter-btn filter-btn-secondary">
+                                    <i class="fas fa-redo"></i> Reset
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Products Table -->
+            <div class="table-section">
+                <div class="table-card">
+                    <div class="table-header">
+                        <h3>All Products</h3>
+                        <span class="table-count">{{ products|length }} products</span>
+                    </div>
+                    <div class="table-wrapper">
+                        {% if products %}
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>Product Name</th>
+                                    <th>Category</th>
+                                    <th>Seller</th>
+                                    <th>Price</th>
+                                    <th>Stock</th>
+                                    <th>Rating</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product in products %}
+                                <tr class="table-row">
+                                    <td>
+                                        <div class="product-name">
+                                            {% if product.image %}
+                                            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-thumb">
+                                            {% else %}
+                                            <div class="product-thumb-placeholder">
+                                                <i class="fas fa-box"></i>
+                                            </div>
+                                            {% endif %}
+                                            <strong>{{ product.name|truncatewords:4 }}</strong>
+                                        </div>
+                                    </td>
+                                    <td>{{ product.category.name }}</td>
+                                    <td>{{ product.seller.username }}</td>
+                                    <td>
+                                        <span class="price-badge">${{ product.price }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="stock-badge {% if product.stock > 10 %}stock-high{% elif product.stock > 0 %}stock-low{% else %}stock-out{% endif %}">
+                                            {% if product.stock > 10 %}{{ product.stock }} units{% elif product.stock > 0 %}{{ product.stock }} units{% else %}Out of Stock{% endif %}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="rating-stars">
+                                            {% for i in "x"|rjust:"5" %}
+                                                {% if forloop.counter <= product.rating %}<i class="fas fa-star"></i>{% else %}<i class="far fa-star"></i>{% endif %}
+                                            {% endfor %}
+                                            <span class="rating-text">({{ product.rating }})</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <a href="{% url 'admin_product_details' product.id %}" class="btn-icon" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{% url 'admin_delete_product' product.id %}" onclick="return confirm('Delete this product?')" class="btn-icon btn-danger" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <p>No products found</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Admin Page Container */
+    .admin-page-container {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        padding-bottom: 4rem;
+    }
+
+    /* Page Header */
+    .admin-page-header {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        padding: 2.5rem 0;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 2rem;
+    }
+
+    .header-title {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        flex: 1;
+    }
+
+    .back-link {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 10px;
+        color: white;
+        text-decoration: none;
+        font-size: 1.2rem;
+        transition: all 0.3s ease;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .back-link:hover {
+        background: rgba(255, 255, 255, 0.25);
+        border-color: rgba(255, 255, 255, 0.4);
+        transform: translateX(-3px);
+        color: white;
+    }
+
+    .header-title h1 {
+        color: white;
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 800;
+    }
+
+    .header-title p {
+        color: rgba(255, 255, 255, 0.8);
+        margin: 0.5rem 0 0 0;
+        font-size: 0.95rem;
+    }
+
+    .header-stats {
+        display: flex;
+        gap: 2rem;
+    }
+
+    .stat-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 1.5rem 2.5rem;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: white;
+        line-height: 1;
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.7);
+        margin-top: 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Page Content */
+    .admin-page-content {
+        padding: 3rem 0;
+    }
+
+    /* Filter Section */
+    .filter-section {
+        margin-bottom: 2.5rem;
+    }
+
+    .filter-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .filter-form {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+        align-items: flex-end;
+    }
+
+    .filter-group {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        width: 100%;
+    }
+
+    .filter-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        flex: 1;
+        min-width: 180px;
+    }
+
+    .filter-item label {
+        font-weight: 600;
+        color: #1f2937;
+        font-size: 0.9rem;
+    }
+
+    .filter-select,
+    .filter-input {
+        padding: 0.75rem 1rem;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background: white;
+        color: #1f2937;
+    }
+
+    .filter-select:focus,
+    .filter-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        background: white;
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .filter-btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .filter-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+
+    .filter-btn-secondary {
+        background: #f3f4f6;
+        color: #1f2937;
+        border: 1.5px solid #e5e7eb;
+    }
+
+    .filter-btn-secondary:hover {
+        background: #e5e7eb;
+        border-color: #d1d5db;
+        color: #1f2937;
+    }
+
+    /* Table Section */
+    .table-section {
+        margin-top: 2rem;
+    }
+
+    .table-card {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .table-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 2rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .table-header h3 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1f2937;
+    }
+
+    .table-count {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    .modern-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0;
+    }
+
+    .modern-table thead {
+        background: #f9fafb;
+    }
+
+    .modern-table thead th {
+        padding: 1.25rem 2rem;
+        text-align: left;
+        font-weight: 700;
+        color: #6b7280;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    .modern-table tbody tr {
+        border-bottom: 1px solid #e5e7eb;
+        transition: all 0.3s ease;
+    }
+
+    .modern-table tbody tr:hover {
+        background: rgba(102, 126, 234, 0.03);
+    }
+
+    .modern-table tbody td {
+        padding: 1.25rem 2rem;
+        color: #1f2937;
+        font-size: 0.95rem;
+    }
+
+    .product-name {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .product-thumb {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        object-fit: cover;
+        border: 1px solid #e5e7eb;
+    }
+
+    .product-thumb-placeholder {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        background: #f3f4f6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #9ca3af;
+        border: 1px solid #e5e7eb;
+    }
+
+    .price-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+
+    .stock-badge {
+        display: inline-block;
+        padding: 0.4rem 0.9rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .stock-high {
+        background: rgba(16, 185, 129, 0.15);
+        color: #059669;
+    }
+
+    .stock-low {
+        background: rgba(251, 191, 36, 0.15);
+        color: #d97706;
+    }
+
+    .stock-out {
+        background: rgba(239, 68, 68, 0.15);
+        color: #dc2626;
+    }
+
+    .rating-stars {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #fbbf24;
+    }
+
+    .rating-stars i {
+        font-size: 0.8rem;
+    }
+
+    .rating-text {
+        color: #9ca3af;
+        font-size: 0.8rem;
+        margin-left: 0.25rem;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-icon {
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background: #f3f4f6;
+        color: #667eea;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        border: 1.5px solid #e5e7eb;
+    }
+
+    .btn-icon:hover {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-icon.btn-danger {
+        color: #ef4444;
+    }
+
+    .btn-icon.btn-danger:hover {
+        background: #ef4444;
+        color: white;
+        border-color: #ef4444;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #9ca3af;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .empty-state p {
+        margin: 0;
+        font-weight: 500;
+        font-size: 1.1rem;
+    }
+
+    /* Dark Mode Support */
+    [data-theme="dark"] .admin-page-container {
+        background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+    }
+
+    [data-theme="dark"] .filter-card,
+    [data-theme="dark"] .table-card {
+        background: #272f3f;
+        border-color: rgba(79, 172, 254, 0.1);
+    }
+
+    [data-theme="dark"] .header-title h1 {
+        color: #f0f9ff;
+    }
+
+    [data-theme="dark"] .table-header h3 {
+        color: #f0f9ff;
+    }
+
+    [data-theme="dark"] .modern-table thead th {
+        background: rgba(79, 172, 254, 0.1);
+        color: #9ca3af;
+        border-bottom-color: rgba(79, 172, 254, 0.2);
+    }
+
+    [data-theme="dark"] .modern-table tbody td {
+        color: #f0f9ff;
+        border-bottom-color: rgba(79, 172, 254, 0.1);
+    }
+
+    [data-theme="dark"] .modern-table tbody tr:hover {
+        background: rgba(102, 126, 234, 0.1);
+    }
+
+    [data-theme="dark"] .filter-select,
+    [data-theme="dark"] .filter-input {
+        background: #374151;
+        color: #f0f9ff;
+        border-color: rgba(79, 172, 254, 0.2);
+    }
+
+    [data-theme="dark"] .filter-btn-secondary {
+        background: rgba(79, 172, 254, 0.1);
+        color: #f0f9ff;
+        border-color: rgba(79, 172, 254, 0.2);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .header-top {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .header-stats {
+            width: 100%;
+            justify-content: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            flex-direction: column;
+        }
+
+        .filter-item {
+            width: 100%;
+        }
+
+        .filter-actions {
+            width: 100%;
+        }
+
+        .filter-btn {
+            flex: 1;
+            justify-content: center;
+        }
+
+        .table-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .modern-table thead th {
+            padding: 1rem;
+            font-size: 0.75rem;
+        }
+
+        .modern-table tbody td {
+            padding: 1rem;
+        }
+
+        .product-name {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .action-buttons {
+            justify-content: flex-start;
+        }
+    }
+</style>
+{% endblock %}

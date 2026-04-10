@@ -1,0 +1,25 @@
+# RoorReach Django E-commerce Project Dependencies
+# Updated: April 2, 2026 - Using HuggingFace free inference API (100% free forever)
+
+# Core Django Framework
+Django==5.2.6
+
+# Django Extensions and Forms
+django-crispy-forms==2.4
+crispy-bootstrap4==2025.6
+
+# Image Processing
+Pillow==11.3.0
+
+# AI & LLM Integration (HuggingFace - completely free, no quotas)
+huggingface-hub>=0.20.0
+requests>=2.31.0
+
+# Environment & Configuration
+python-dotenv>=1.0.0
+
+# Database and Core Dependencies (automatically installed with Django)
+asgiref==3.9.1
+sqlparse==0.5.3
+tzdata==2025.2
+

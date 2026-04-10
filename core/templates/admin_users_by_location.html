@@ -1,0 +1,849 @@
+{% extends 'base.html' %}
+
+{% block title %}Users by Location - Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="location-users-container">
+    <!-- Header -->
+    <div class="location-header">
+        <div class="container-fluid px-4">
+            <div class="header-content">
+                <a href="{% url 'admin_dashboard' %}" class="back-link">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+                <div class="header-title">
+                    <h1>Users by Division</h1>
+                    <p>Manage and view users organized by Bangladesh divisions</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content -->
+    <div class="location-content">
+        <div class="container-fluid px-4">
+            <!-- Division Cards Grid -->
+            <div class="divisions-grid">
+                {% for division, data in division_data.items %}
+                <div class="division-card">
+                    <a href="?division={{ division }}" class="division-link">
+                        <div class="division-card-header">
+                            <div class="division-info">
+                                <i class="fas fa-map-marker-alt division-icon"></i>
+                                <h3>{{ division }}</h3>
+                            </div>
+                            <i class="fas fa-chevron-right arrow-icon"></i>
+                        </div>
+                        
+                        <div class="division-stats">
+                            <div class="stat-item">
+                                <div class="stat-icon buyers">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-label">Buyers</span>
+                                    <span class="stat-value">{{ data.total_buyers }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="stat-item">
+                                <div class="stat-icon sellers">
+                                    <i class="fas fa-store"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-label">Sellers</span>
+                                    <span class="stat-value">{{ data.total_sellers }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="stat-item">
+                                <div class="stat-icon total">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div class="stat-info">
+                                    <span class="stat-label">Total</span>
+                                    <span class="stat-value">{{ data.total_users }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Selected Division Details -->
+            {% if selected_data %}
+            <div class="selected-division-section">
+                <div class="section-header">
+                    <h2>{{ selected_data.division }} Division Details</h2>
+                    <a href="?" class="clear-selection">Clear Selection</a>
+                </div>
+
+                <!-- Tabs for Buyers/Sellers -->
+                <div class="user-tabs">
+                    <div class="tab-buttons">
+                        <button class="tab-btn active" data-tab="buyers">
+                            <i class="fas fa-users"></i>
+                            Buyers ({{ selected_data.stats.total_buyers }})
+                        </button>
+                        <button class="tab-btn" data-tab="sellers">
+                            <i class="fas fa-store"></i>
+                            Sellers ({{ selected_data.stats.total_sellers }})
+                        </button>
+                    </div>
+
+                    <!-- Buyers Tab -->
+                    <div class="tab-content active" id="buyers">
+                        {% if selected_data.stats.buyers_list %}
+                        <div class="users-list">
+                            {% for buyer in selected_data.stats.buyers_list %}
+                            <div class="user-item">
+                                <div class="user-avatar">
+                                    {% if buyer.profile_image %}
+                                        <img src="{{ buyer.profile_image.url }}" alt="{{ buyer.username }}" class="avatar-image">
+                                    {% else %}
+                                        <div class="avatar-placeholder">{{ buyer.username|first|upper }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="user-info">
+                                    <div class="user-header">
+                                        <h4>{{ buyer.first_name }} {{ buyer.last_name }}</h4>
+                                        <span class="user-badge buyer-badge">
+                                            <i class="fas fa-check-circle"></i> Buyer
+                                        </span>
+                                    </div>
+                                    <p class="username">@{{ buyer.username }}</p>
+                                    <div class="user-details">
+                                        <span><i class="fas fa-envelope"></i> {{ buyer.email }}</span>
+                                        <span><i class="fas fa-phone"></i> {{ buyer.phone }}</span>
+                                        <span><i class="fas fa-map-marker-alt"></i> {{ buyer.location }}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="user-actions">
+                                    {% if buyer.is_active %}
+                                        <a href="{% url 'admin_user_details' buyer.id %}" class="action-link view-btn">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                        <a href="{% url 'admin_deactivate_user' buyer.id %}" onclick="return confirm('Deactivate this user?')" class="action-link deactivate-btn">
+                                            <i class="fas fa-ban"></i> Deactivate
+                                        </a>
+                                    {% else %}
+                                        <a href="{% url 'admin_activate_user' buyer.id %}" class="action-link activate-btn">
+                                            <i class="fas fa-check"></i> Activate
+                                        </a>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="user-status">
+                                    {% if buyer.is_active %}
+                                        <span class="status-badge active">Active</span>
+                                    {% else %}
+                                        <span class="status-badge inactive">Inactive</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <h4>No Buyers Found</h4>
+                            <p>There are no buyers in the {{ selected_data.division }} division.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Sellers Tab -->
+                    <div class="tab-content" id="sellers">
+                        {% if selected_data.stats.sellers_list %}
+                        <div class="users-list">
+                            {% for seller in selected_data.stats.sellers_list %}
+                            <div class="user-item">
+                                <div class="user-avatar">
+                                    {% if seller.profile_image %}
+                                        <img src="{{ seller.profile_image.url }}" alt="{{ seller.username }}" class="avatar-image">
+                                    {% else %}
+                                        <div class="avatar-placeholder">{{ seller.username|first|upper }}</div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="user-info">
+                                    <div class="user-header">
+                                        <h4>{{ seller.first_name }} {{ seller.last_name }}</h4>
+                                        <span class="user-badge seller-badge">
+                                            <i class="fas fa-check-circle"></i> Seller
+                                        </span>
+                                    </div>
+                                    <p class="username">@{{ seller.username }}</p>
+                                    <div class="user-details">
+                                        <span><i class="fas fa-envelope"></i> {{ seller.email }}</span>
+                                        <span><i class="fas fa-phone"></i> {{ seller.phone }}</span>
+                                        <span><i class="fas fa-map-marker-alt"></i> {{ seller.location }}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="user-actions">
+                                    {% if seller.is_active %}
+                                        <a href="{% url 'admin_user_details' seller.id %}" class="action-link view-btn">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                        <a href="{% url 'admin_deactivate_user' seller.id %}" onclick="return confirm('Deactivate this seller?')" class="action-link deactivate-btn">
+                                            <i class="fas fa-ban"></i> Deactivate
+                                        </a>
+                                    {% else %}
+                                        <a href="{% url 'admin_activate_user' seller.id %}" class="action-link activate-btn">
+                                            <i class="fas fa-check"></i> Activate
+                                        </a>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="user-status">
+                                    {% if seller.is_active %}
+                                        <span class="status-badge active">Active</span>
+                                    {% else %}
+                                        <span class="status-badge inactive">Inactive</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <h4>No Sellers Found</h4>
+                            <p>There are no sellers in the {{ selected_data.division }} division.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .location-users-container {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        padding-bottom: 4rem;
+    }
+
+    /* Header */
+    .location-header {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        padding: 2.5rem 0;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-content {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: rgba(255, 255, 255, 0.15);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+        color: white;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .back-link:hover {
+        background: rgba(255, 255, 255, 0.25);
+        border-color: rgba(255, 255, 255, 0.4);
+        transform: translateX(-3px);
+    }
+
+    .header-title {
+        flex: 1;
+    }
+
+    .header-title h1 {
+        color: white;
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 800;
+    }
+
+    .header-title p {
+        color: rgba(255, 255, 255, 0.8);
+        margin: 0.5rem 0 0 0;
+        font-size: 0.95rem;
+    }
+
+    /* Content */
+    .location-content {
+        padding: 3rem 0;
+    }
+
+    /* Division Cards Grid */
+    .divisions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 2rem;
+        margin-bottom: 4rem;
+    }
+
+    .division-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .division-link {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .division-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+    }
+
+    .division-card-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: white;
+    }
+
+    .division-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex: 1;
+    }
+
+    .division-icon {
+        font-size: 1.5rem;
+    }
+
+    .division-card-header h3 {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 800;
+    }
+
+    .arrow-icon {
+        font-size: 1.25rem;
+        transition: transform 0.3s ease;
+    }
+
+    .division-card:hover .arrow-icon {
+        transform: translateX(3px);
+    }
+
+    .division-stats {
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        flex: 1;
+    }
+
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem;
+        background: #f9fafb;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .division-card:hover .stat-item {
+        background: rgba(102, 126, 234, 0.05);
+    }
+
+    .stat-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        color: white;
+        font-size: 1rem;
+    }
+
+    .stat-icon.buyers {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .stat-icon.sellers {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    .stat-icon.total {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+
+    .stat-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #9ca3af;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #1f2937;
+    }
+
+    /* Selected Division Section */
+    .selected-division-section {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .section-header {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        padding: 2rem;
+        border-bottom: 2px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .section-header h2 {
+        margin: 0;
+        color: #1f2937;
+        font-size: 1.5rem;
+        font-weight: 800;
+    }
+
+    .clear-selection {
+        padding: 0.5rem 1.5rem;
+        background: #f3f4f6;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 10px;
+        color: #374151;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .clear-selection:hover {
+        background: #e5e7eb;
+        border-color: #d1d5db;
+    }
+
+    /* Tabs */
+    .user-tabs {
+        padding: 2rem;
+    }
+
+    .tab-buttons {
+        display: flex;
+        gap: 1rem;
+        border-bottom: 2px solid #e5e7eb;
+        margin-bottom: 2rem;
+    }
+
+    .tab-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 1rem 1.5rem;
+        background: none;
+        border: none;
+        border-bottom: 3px solid transparent;
+        color: #6b7280;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+    }
+
+    .tab-btn:hover {
+        color: #667eea;
+    }
+
+    .tab-btn.active {
+        color: #667eea;
+        border-bottom-color: #667eea;
+    }
+
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    /* Users List */
+    .users-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .user-item {
+        display: grid;
+        grid-template-columns: auto 1fr auto auto;
+        gap: 1.5rem;
+        align-items: center;
+        padding: 1.5rem;
+        background: #f9fafb;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+        transition: all 0.3s ease;
+    }
+
+    .user-item:hover {
+        background: white;
+        border-color: #667eea;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+    }
+
+    .user-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .avatar-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .avatar-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        font-weight: 800;
+        font-size: 1.25rem;
+    }
+
+    .user-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .user-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .user-header h4 {
+        margin: 0;
+        color: #1f2937;
+        font-weight: 700;
+    }
+
+    .username {
+        margin: 0;
+        color: #9ca3af;
+        font-size: 0.9rem;
+    }
+
+    .user-details {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-top: 0.5rem;
+    }
+
+    .user-details span {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.85rem;
+        color: #6b7280;
+    }
+
+    .user-details i {
+        color: #667eea;
+        min-width: 16px;
+    }
+
+    .user-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .buyer-badge {
+        background: rgba(102, 126, 234, 0.15);
+        color: #667eea;
+    }
+
+    .seller-badge {
+        background: rgba(16, 185, 129, 0.15);
+        color: #10b981;
+    }
+
+    .user-actions {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .action-link {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .view-btn {
+        background: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+        border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    .view-btn:hover {
+        background: #3b82f6;
+        color: white;
+        border-color: #3b82f6;
+    }
+
+    .deactivate-btn {
+        background: rgba(239, 68, 68, 0.1);
+        color: #dc2626;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .deactivate-btn:hover {
+        background: #dc2626;
+        color: white;
+        border-color: #dc2626;
+    }
+
+    .activate-btn {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .activate-btn:hover {
+        background: #10b981;
+        color: white;
+        border-color: #10b981;
+    }
+
+    .user-status {
+        display: flex;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .status-badge.active {
+        background: rgba(16, 185, 129, 0.15);
+        color: #10b981;
+    }
+
+    .status-badge.inactive {
+        background: rgba(156, 163, 175, 0.15);
+        color: #6b7280;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        background: #f9fafb;
+        border-radius: 12px;
+        border: 2px dashed #e5e7eb;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        color: #d1d5db;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h4 {
+        color: #1f2937;
+        margin: 0.5rem 0;
+        font-size: 1.1rem;
+    }
+
+    .empty-state p {
+        color: #9ca3af;
+        margin: 0;
+        font-size: 0.9rem;
+    }
+
+    /* Dark Mode */
+    [data-theme="dark"] .division-card,
+    [data-theme="dark"] .selected-division-section {
+        background: #272f3f;
+        border-color: rgba(79, 172, 254, 0.1);
+    }
+
+    [data-theme="dark"] .section-header,
+    [data-theme="dark"] .division-card-header {
+        background: linear-gradient(135deg, rgba(79, 172, 254, 0.15) 0%, rgba(102, 126, 234, 0.15) 100%);
+        border-bottom-color: rgba(79, 172, 254, 0.2);
+    }
+
+    [data-theme="dark"] .user-item {
+        background: rgba(79, 172, 254, 0.1);
+        border-color: rgba(79, 172, 254, 0.15);
+    }
+
+    [data-theme="dark"] .section-header h2,
+    [data-theme="dark"] .user-header h4,
+    [data-theme="dark"] .division-card-header h3 {
+        color: #f0f9ff;
+    }
+
+    [data-theme="dark"] .stat-item {
+        background: rgba(79, 172, 254, 0.1);
+    }
+
+    [data-theme="dark"] .tab-buttons {
+        border-bottom-color: rgba(79, 172, 254, 0.2);
+    }
+
+    [data-theme="dark"] .empty-state {
+        background: rgba(79, 172, 254, 0.1);
+        border-color: rgba(79, 172, 254, 0.2);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .header-content {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .header-title h1 {
+            font-size: 1.5rem;
+        }
+
+        .divisions-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .user-item {
+            grid-template-columns: auto 1fr;
+            gap: 1rem;
+        }
+
+        .user-actions,
+        .user-status {
+            grid-column: 2;
+        }
+
+        .user-details {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .section-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .tab-buttons {
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            flex: 1;
+            min-width: 150px;
+        }
+    }
+</style>
+
+<script>
+    // Tab switching functionality
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const tabId = this.getAttribute('data-tab');
+            
+            // Remove active class from all buttons and contents
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            // Add active class to clicked button and corresponding content
+            this.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        });
+    });
+</script>
+
+{% endblock %}

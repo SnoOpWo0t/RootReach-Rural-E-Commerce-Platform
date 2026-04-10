@@ -1,0 +1,978 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}RootReach - Profile{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --gradient-success: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        --gradient-warning: linear-gradient(135deg, #fbbf24 0%, #f97316 100%);
+        --gradient-danger: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+        --box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        --card-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    }
+
+    /* Animations */
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes glowPulse {
+        0%, 100% {
+            box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7);
+        }
+        50% {
+            box-shadow: 0 0 0 10px rgba(102, 126, 234, 0);
+        }
+    }
+
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0px);
+        }
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    .profile-wrapper {
+        min-height: calc(100vh - 80px);
+        background: var(--bg-primary);
+        padding: 60px 20px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .profile-wrapper::before {
+        content: '';
+        position: fixed;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(0, 82, 204, 0.05) 0%, transparent 70%);
+        border-radius: 50%;
+        top: -100px;
+        left: -100px;
+        pointer-events: none;
+        z-index: 1;
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .profile-wrapper::after {
+        content: '';
+        position: fixed;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(0, 163, 191, 0.03) 0%, transparent 70%);
+        border-radius: 50%;
+        bottom: -50px;
+        right: -50px;
+        pointer-events: none;
+        z-index: 1;
+        animation: float 8s ease-in-out infinite reverse;
+    }
+
+    .profile-container {
+        max-width: 1100px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 40px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .profile-sidebar {
+        position: sticky;
+        top: 30px;
+        height: fit-content;
+    }
+
+    .profile-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-radius: 16px;
+        border: 1px solid rgba(0, 82, 204, 0.1);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        animation: fadeInLeft 0.8s ease-out;
+        transition: all 0.4s ease;
+    }
+
+    .profile-card:hover {
+        background: rgba(255, 255, 255, 0.12);
+        border-color: rgba(0, 82, 204, 0.2);
+        box-shadow: 0 8px 32px rgba(0, 82, 204, 0.15);
+        transform: translateY(-5px);
+    }
+
+    [data-theme="dark"] .profile-card {
+        background: rgba(20, 35, 80, 0.5);
+        border-color: rgba(100, 200, 255, 0.15);
+    }
+
+    [data-theme="dark"] .profile-card:hover {
+        background: rgba(30, 50, 100, 0.6);
+        border-color: rgba(100, 200, 255, 0.3);
+    }
+
+    .profile-cover {
+        height: 120px;
+        background: linear-gradient(135deg, #0052cc 0%, #00a3bf 100%);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .profile-cover::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.2));
+        z-index: 1;
+    }
+
+    .profile-cover::after {
+        content: '';
+        position: absolute;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+        border-radius: 50%;
+        top: -50px;
+        right: -50px;
+        animation: float 4s ease-in-out infinite;
+    }
+
+    .profile-picture-container {
+        position: relative;
+        margin-top: -65px;
+        padding: 0 20px;
+    }
+
+    .profile-picture-wrapper {
+        width: 130px;
+        height: 130px;
+        border-radius: 50%;
+        padding: 5px;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        margin: 0 auto;
+        position: relative;
+        animation: fadeInDown 0.8s ease-out 0.2s both;
+    }
+
+    .profile-picture {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid rgba(255, 255, 255, 0.5);
+        transition: all 0.4s ease;
+        box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-picture-wrapper:hover .profile-picture {
+        transform: scale(1.05);
+        filter: brightness(1.1);
+    }
+
+    .profile-picture-upload {
+        position: absolute;
+        right: -5px;
+        bottom: 0;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: var(--gradient-secondary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 16px rgba(245, 87, 108, 0.4);
+        border: 3px solid white;
+        font-size: 1.1rem;
+    }
+
+    .profile-picture-upload:hover {
+        transform: scale(1.15) rotate(15deg);
+        box-shadow: 0 8px 24px rgba(245, 87, 108, 0.6);
+    }
+
+    .profile-picture-upload:active {
+        transform: scale(0.95);
+    }
+
+    .profile-info {
+        padding: 30px 20px 25px;
+        text-align: center;
+        animation: fadeInUp 0.8s ease-out 0.4s both;
+    }
+
+    .profile-name {
+        font-size: 1.65rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 12px 0 0;
+        letter-spacing: -0.5px;
+    }
+
+    .profile-email {
+        color: var(--text-secondary);
+        margin: 10px 0;
+        font-size: 0.95rem;
+        font-weight: 500;
+    }
+
+    .profile-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border-radius: 25px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        margin-top: 16px;
+        background: linear-gradient(135deg, #0052cc 0%, #0052cc 100%);
+        border: none;
+        color: white;
+        transition: all 0.3s ease;
+        letter-spacing: 0.5px;
+        box-shadow: 0 4px 15px rgba(0, 82, 204, 0.35);
+    }
+
+    .profile-status:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 82, 204, 0.5);
+    }
+
+    .status-buyer {
+        background: linear-gradient(135deg, #00a3bf 0%, #0052cc 100%);
+        box-shadow: 0 4px 15px rgba(0, 163, 191, 0.35);
+    }
+
+    .status-buyer:hover {
+        box-shadow: 0 8px 25px rgba(0, 163, 191, 0.5);
+    }
+
+    .status-seller {
+        background: linear-gradient(135deg, #ffa500 0%, #ff8c00 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(255, 165, 0, 0.35);
+    }
+
+    .status-seller:hover {
+        box-shadow: 0 8px 25px rgba(255, 165, 0, 0.5);
+    }
+
+    .content-card {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-radius: 24px;
+        border: 2px solid rgba(102, 126, 234, 0.1);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        animation: fadeInUp 0.8s ease-out both;
+        transition: all 0.4s ease;
+    }
+
+    .content-card:nth-child(1) {
+        animation-delay: 0.2s;
+    }
+
+    .content-card:nth-child(2) {
+        animation-delay: 0.4s;
+    }
+
+    .content-card:hover {
+        background: var(--bg-secondary);\n        border-color: rgba(0, 82, 204, 0.2);\n        box-shadow: 0 8px 32px rgba(0, 82, 204, 0.15);\n        transform: translateY(-5px);\n    }
+
+    .card-header {
+        padding: 28px 32px;
+        border-bottom: 1px solid rgba(0, 82, 204, 0.1);
+        background: var(--bg-secondary);
+    }
+
+    .card-title {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        letter-spacing: -0.3px;
+    }
+
+    .card-title i {
+        color: #0052cc;
+        font-size: 1.4rem;
+    }
+
+    .form-group {
+        margin-bottom: 32px;
+        animation: fadeInUp 0.6s ease-out both;
+    }
+
+    .form-group:nth-child(1) { animation-delay: 0.1s; }
+    .form-group:nth-child(2) { animation-delay: 0.15s; }
+    .form-group:nth-child(3) { animation-delay: 0.2s; }
+    .form-group:nth-child(4) { animation-delay: 0.25s; }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 12px;
+        font-weight: 700;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+        letter-spacing: 0.3px;
+        text-transform: capitalize;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 14px 16px;
+        border: 2px solid var(--input-border);
+        border-radius: 12px;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        transition: all 0.3s ease;
+        background: var(--input-bg);
+        color: var(--text-primary);
+        font-weight: 500;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .form-control::placeholder {
+        color: var(--text-tertiary);
+        font-size: 0.9rem;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #0052cc;
+        box-shadow: 0 0 0 6px rgba(0, 82, 204, 0.15);
+        transform: translateY(-2px);
+        background: var(--bg-primary);
+    }
+
+    .form-control:hover:not(:focus) {
+        border-color: rgba(0, 82, 204, 0.3);
+        background: var(--bg-secondary);
+    }
+
+    .profile-actions {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        padding: 14px 28px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: all 0.3s ease;
+        border-radius: 14px;
+        letter-spacing: 0.3px;
+        cursor: pointer;
+        border: none;
+        position: relative;
+        overflow: hidden;
+        font-size: 1rem;
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.2);
+        transition: left 0.3s ease;
+        z-index: 0;
+    }
+
+    .btn:hover::before {
+        left: 100%;
+    }
+
+    .btn i,
+    .btn span {
+        position: relative;
+        z-index: 1;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #0052cc 0%, #0052cc 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(0, 82, 204, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0, 82, 204, 0.5);
+    }
+
+    .btn-logout {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+    }
+
+    .btn-logout:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(220, 38, 38, 0.5);
+    }
+
+    .seller-link {
+        background: linear-gradient(135deg, #ffd700 0%, #ffa500 100%);
+        color: #333;
+        box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+    }
+
+    .seller-link:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(255, 215, 0, 0.5);
+    }
+
+    .error-message {
+        color: #dc2626;
+        font-size: 0.85rem;
+        margin-top: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        background: rgba(220, 38, 38, 0.1);
+        border-radius: 10px;
+        border-left: 3px solid #dc2626;
+        animation: slideInLeft 0.3s ease-out;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 992px) {
+        .profile-container {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .profile-wrapper {
+            padding: 40px 15px;
+        }
+
+        .profile-container {
+            gap: 24px;
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        .card-header {
+            padding: 20px 24px;
+        }
+
+        .btn-primary,
+        .seller-link,
+        .btn-logout {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .profile-actions {
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .action-buttons-left,
+        .action-buttons-right {
+            justify-content: center;
+            width: 100%;
+        }
+
+        .btn {
+            flex: 1;
+            text-align: center;
+            justify-content: center;
+            min-width: 100%;
+        }
+
+        .card-title {
+            font-size: 1.15rem;
+        }
+
+        .profile-name {
+            font-size: 1.45rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .profile-wrapper {
+            padding: 30px 10px;
+        }
+
+        .profile-container {
+            gap: 20px;
+        }
+
+        .profile-picture-wrapper {
+            width: 110px;
+            height: 110px;
+        }
+
+        .profile-picture-upload {
+            width: 38px;
+            height: 38px;
+            font-size: 0.9rem;
+        }
+
+        .card-body {
+            padding: 18px;
+        }
+
+        .card-header {
+            padding: 16px 18px;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            gap: 8px;
+        }
+
+        .card-title i {
+            font-size: 1.2rem;
+        }
+
+    .card-body {
+        padding: 32px;
+    }
+
+    .form-section:not(:last-child) {
+        margin-bottom: 24px;
+        padding-bottom: 24px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 992px) {
+        .profile-container {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .profile-wrapper {
+            padding: 40px 15px;
+        }
+
+        .profile-container {
+            gap: 24px;
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        .card-header {
+            padding: 20px 24px;
+        }
+
+        .btn-primary,
+        .seller-link,
+        .btn-logout {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .profile-actions {
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .action-buttons-left,
+        .action-buttons-right {
+            justify-content: center;
+            width: 100%;
+        }
+
+        .btn {
+            flex: 1;
+            text-align: center;
+            justify-content: center;
+            min-width: 100%;
+        }
+
+        .card-title {
+            font-size: 1.15rem;
+        }
+
+        .profile-name {
+            font-size: 1.45rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .profile-wrapper {
+            padding: 30px 10px;
+        }
+
+        .profile-container {
+            gap: 20px;
+        }
+
+        .profile-picture-wrapper {
+            width: 110px;
+            height: 110px;
+        }
+
+        .profile-picture-upload {
+            width: 38px;
+            height: 38px;
+            font-size: 0.9rem;
+        }
+
+        .card-body {
+            padding: 18px;
+        }
+
+        .card-header {
+            padding: 16px 18px;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            gap: 8px;
+        }
+
+        .card-title i {
+            font-size: 1.2rem;
+        }
+
+        .form-section:not(:last-child) {
+            margin-bottom: 24px;
+            padding-bottom: 24px;
+        }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-wrapper">
+    <div class="profile-container">
+        <!-- Profile Sidebar -->
+        <div class="profile-sidebar">
+            <div class="profile-card">
+                <div class="profile-cover"></div>
+                <div class="profile-picture-container">
+                    <div class="profile-picture-wrapper">
+                        {% if user.profile_image %}
+                            <img src="{{ user.profile_image.url }}" alt="Profile Picture" class="profile-picture" id="profileImage">
+                        {% else %}
+                            <img src="{% static 'images/user-profile-icon-free-vector.jpg' %}" alt="Default Picture" class="profile-picture" id="profileImage">
+                        {% endif %}
+                        <label for="profileImageInput" class="profile-picture-upload" title="Change profile picture">
+                            <i class="fas fa-camera"></i>
+                        </label>
+                    </div>
+                </div>
+                <div class="profile-info">
+                    <h1 class="profile-name">{{ user.first_name }} {{ user.last_name }}</h1>
+                    <p class="profile-email">{{ user.email }}</p>
+                    <span class="profile-status {% if user.is_seller %}status-seller{% else %}status-buyer{% endif %}">
+                        {% if user.is_seller %}
+                            <i class="fas fa-store"></i> Seller Account
+                        {% else %}
+                            <i class="fas fa-user"></i> Buyer Account
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Content -->
+        <div class="profile-content">
+            <form method="POST" enctype="multipart/form-data" id="profileForm">
+                {% csrf_token %}
+                <input type="file" id="profileImageInput" name="profile_image" style="display: none" accept="image/*">
+
+                <!-- Personal Information -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-user-circle"></i>
+                            Personal Information
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-section">
+                            {% for field in form %}
+                                {% if field.name in 'first_name,last_name,email,phone' %}
+                                    <div class="form-group">
+                                        {{ field.label_tag }}
+                                        {{ field }}
+                                        {% if field.errors %}
+                                            <div class="error-message">
+                                                <i class="fas fa-exclamation-circle"></i>
+                                                {{ field.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Information -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-info-circle"></i>
+                            Additional Information
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        {% for field in form %}
+                            {% if field.name not in 'first_name,last_name,email,phone,profile_image' %}
+                                <div class="form-group">
+                                    {{ field.label_tag }}
+                                    {{ field }}
+                                    {% if field.errors %}
+                                        <div class="error-message">
+                                            <i class="fas fa-exclamation-circle"></i>
+                                            {{ field.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+
+                        <div class="profile-actions">
+                            <div class="action-buttons-left">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save"></i>
+                                    Save Changes
+                                </button>
+                                {% if not user.is_seller %}
+                                    <a href="{% url 'apply_seller' %}" class="btn seller-link">
+                                        <i class="fas fa-store"></i>
+                                        Apply as Seller
+                                    </a>
+                                {% endif %}
+                            </div>
+                            <div class="action-buttons-right">
+                                <a href="{% url 'logout' %}" class="btn btn-logout" onclick="return confirm('Are you sure you want to logout?')">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    Logout
+                                </a>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('profileForm');
+        const profileImageInput = document.getElementById('profileImageInput');
+        const profileImage = document.getElementById('profileImage');
+        const profilePictureWrapper = document.querySelector('.profile-picture-wrapper');
+
+        // Handle profile image upload with smooth transition
+        profileImageInput.addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    // Fade out effect
+                    profileImage.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        profileImage.src = e.target.result;
+                        profileImage.style.transition = 'opacity 0.4s ease-out';
+                        profileImage.style.opacity = '1';
+                    }, 200);
+                    
+                    if (window.showToast) {
+                        window.showToast('✨ Profile picture selected! Click Save Changes to update.', 'info');
+                    }
+                }
+                
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+
+        // Add input styling and animations
+        const inputs = form.querySelectorAll('input, textarea, select');
+        inputs.forEach(input => {
+            input.classList.add('form-control');
+            
+            // Add focus animation
+            input.addEventListener('focus', function() {
+                this.style.boxShadow = '0 0 0 5px rgba(102, 126, 234, 0.2), inset 0 0 10px rgba(102, 126, 234, 0.1)';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.style.boxShadow = 'none';
+            });
+        });
+
+        // Form submission with loading state
+        form.addEventListener('submit', function(e) {
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalHtml = submitBtn.innerHTML;
+            const originalTransform = submitBtn.style.transform;
+            
+            submitBtn.disabled = true;
+            submitBtn.html = '<i class="fas fa-circle-notch fa-spin"></i> Saving...';
+            submitBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin" style="animation: spin 1s linear infinite;"></i> Saving...';
+            
+            if (window.showToast) {
+                window.showToast('💾 Saving your changes...', 'info');
+            }
+
+            // Add spinner animation
+            const style = document.createElement('style');
+            style.innerHTML = `
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+            `;
+            document.head.appendChild(style);
+        });
+
+        // Add parallax effect to profile card
+        const profileCard = document.querySelector('.profile-card');
+        if (profileCard) {
+            document.addEventListener('mousemove', function(e) {
+                const xPos = (e.clientX / window.innerWidth) * 10;
+                const yPos = (e.clientY / window.innerHeight) * 10;
+                profileCard.style.transform = `perspective(1000px) rotateX(${yPos * 0.5}deg) rotateY(${xPos * 0.5}deg)`;
+            });
+
+            document.addEventListener('mouseleave', function() {
+                profileCard.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+            });
+        }
+
+        // Smooth scroll to form errors
+        const errorMessages = document.querySelectorAll('.error-message');
+        if (errorMessages.length > 0) {
+            setTimeout(() => {
+                const firstError = errorMessages[0];
+                firstError.closest('.form-group').scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center' 
+                });
+            }, 300);
+        }
+
+        // Add ripple effect to buttons
+        const buttons = document.querySelectorAll('.btn');
+        buttons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                ripple.classList.add('ripple');
+
+                // Add ripple styles if not already added
+                if (!document.querySelector('style[data-ripple]')) {
+                    const style = document.createElement('style');
+                    style.setAttribute('data-ripple', '');
+                    style.innerHTML = `
+                        .btn {
+                            position: relative;
+                            overflow: hidden;
+                        }
+                        .ripple {
+                            position: absolute;
+                            border-radius: 50%;
+                            background: rgba(255, 255, 255, 0.6);
+                            transform: scale(0);
+                            animation: ripple-animation 0.6s ease-out;
+                            pointer-events: none;
+                        }
+                        @keyframes ripple-animation {
+                            to {
+                                transform: scale(4);
+                                opacity: 0;
+                            }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+
+                this.appendChild(ripple);
+            });
+        });
+    });
+</script>
+{% endblock %}
