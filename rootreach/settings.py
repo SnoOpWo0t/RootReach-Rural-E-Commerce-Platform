@@ -32,7 +32,7 @@ DEBUG = os.getenv('DEBUG', 'False').lower() in {'1', 'true', 'yes', 'on'}
 
 ALLOWED_HOSTS = [
     host.strip()
-    for host in os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,.vercel.app').split(',')
+    for host in os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,*.vercel.app').split(',')
     if host.strip()
 ]
 
