@@ -31,12 +31,13 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-tyd0zlim4u0h%0ait%@a^=aek1
 DEBUG = os.getenv('DEBUG', 'False').lower() in {'1', 'true', 'yes', 'on'}
 
 # Build ALLOWED_HOSTS list
-_allowed_hosts = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,*.vercel.app').split(',')
+_default_hosts = 'localhost,127.0.0.1,*.vercel.app,root-reach.vercel.app,root-reach-git-main-snoopwo0ts-projects.vercel.app,root-reach-ctqzf7xvq-snoopwo0ts-projects.vercel.app'
+_allowed_hosts = os.getenv('ALLOWED_HOSTS', _default_hosts).split(',')
 ALLOWED_HOSTS = [host.strip() for host in _allowed_hosts if host.strip()]
 
-# Always add Vercel URL if available (Vercel sets this automatically)
+# Always add the actual Vercel deployment URL if available
 _vercel_url = os.getenv('VERCEL_URL', '').strip()
-if _vercel_url:
+if _vercel_url and _vercel_url not in ALLOWED_HOSTS:
     ALLOWED_HOSTS.append(_vercel_url)
 
 LOGIN_URL = '/login/'
