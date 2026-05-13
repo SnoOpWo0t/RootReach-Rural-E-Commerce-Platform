@@ -189,8 +189,8 @@
             <div class="login-form">
                 {% if messages %}
                     {% for message in messages %}
-                        <div class="error-message">
-                            <i class="fas fa-exclamation-circle"></i>
+                        <div class="error-message" style="{% if message.tags == 'info' %}background:#eef4ff;color:#2446c7;{% endif %}">
+                            <i class="fas {% if message.tags == 'info' %}fa-circle-info{% else %}fa-exclamation-circle{% endif %}"></i>
                             {{ message }}
                         </div>
                     {% endfor %}
@@ -198,6 +198,9 @@
 
                 <form method="POST" id="loginForm">
                     {% csrf_token %}
+                    {% if next %}
+                        <input type="hidden" name="next" value="{{ next }}">
+                    {% endif %}
                     <div class="form-group">
                         <label for="username">Username</label>
                         <input 

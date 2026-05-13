@@ -1113,12 +1113,18 @@
         }
 
         .profile-nav-picture {
-            width: 32px;
-            height: 32px;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid #ffd700;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            border: 2.5px solid #ffd700;
+            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.25), 0 0 20px rgba(255, 215, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .profile-nav-picture:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(255, 215, 0, 0.35), 0 0 30px rgba(255, 215, 0, 0.2);
         }
 
         .profile-nav-text {

@@ -96,6 +96,16 @@ For production, you'll also need:
 - A web server (Nginx + Gunicorn)
 - Environment variables for secrets
 
+### Vercel deployment
+This project now includes a Vercel serverless entrypoint in `api/index.py` and a `vercel.json` build config.
+
+Before deploying, set these environment variables in Vercel:
+- `SECRET_KEY`
+- `DEBUG=false`
+- `ALLOWED_HOSTS=your-project.vercel.app`
+
+Important: Vercel is best used here as a demo deployment. SQLite and local `media/` uploads are not durable there, so for real production you should move the database and uploads to external managed services.
+
 ## 📞 Support
 If you encounter any issues, check:
 1. Python version: `python --version`

@@ -161,7 +161,7 @@
     }
 
     .profile-cover {
-        height: 120px;
+        height: 140px;
         background: linear-gradient(135deg, #0052cc 0%, #00a3bf 100%);
         position: relative;
         overflow: hidden;
@@ -189,23 +189,31 @@
 
     .profile-picture-container {
         position: relative;
-        margin-top: -65px;
+        margin-top: -100px;
         padding: 0 20px;
+        z-index: 10;
     }
 
     .profile-picture-wrapper {
-        width: 130px;
-        height: 130px;
+        width: 160px;
+        height: 160px;
         border-radius: 50%;
-        padding: 5px;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 3px solid rgba(255, 255, 255, 0.3);
-        box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        padding: 6px;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.15));
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 4px solid rgba(255, 255, 255, 0.5);
+        box-shadow: 0 15px 45px rgba(0, 82, 204, 0.35), 0 0 40px rgba(0, 163, 191, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.6);
         margin: 0 auto;
         position: relative;
         animation: fadeInDown 0.8s ease-out 0.2s both;
+        transition: all 0.4s ease;
+        z-index: 10;
+    }
+
+    .profile-picture-wrapper:hover {
+        transform: scale(1.08) translateY(-8px);
+        box-shadow: 0 20px 60px rgba(0, 82, 204, 0.4), 0 0 50px rgba(0, 163, 191, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.7);
     }
 
     .profile-picture {
@@ -225,10 +233,10 @@
 
     .profile-picture-upload {
         position: absolute;
-        right: -5px;
-        bottom: 0;
-        width: 44px;
-        height: 44px;
+        right: -8px;
+        bottom: 5px;
+        width: 52px;
+        height: 52px;
         border-radius: 50%;
         background: var(--gradient-secondary);
         color: white;
@@ -237,18 +245,18 @@
         justify-content: center;
         cursor: pointer;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 16px rgba(245, 87, 108, 0.4);
-        border: 3px solid white;
-        font-size: 1.1rem;
+        box-shadow: 0 6px 20px rgba(245, 87, 108, 0.5), 0 0 30px rgba(245, 87, 108, 0.2);
+        border: 4px solid white;
+        font-size: 1.3rem;
     }
 
     .profile-picture-upload:hover {
-        transform: scale(1.15) rotate(15deg);
-        box-shadow: 0 8px 24px rgba(245, 87, 108, 0.6);
+        transform: scale(1.2) rotate(20deg);
+        box-shadow: 0 10px 35px rgba(245, 87, 108, 0.7), 0 0 50px rgba(245, 87, 108, 0.35);
     }
 
     .profile-picture-upload:active {
-        transform: scale(0.95);
+        transform: scale(0.92);
     }
 
     .profile-info {
@@ -367,6 +375,17 @@
     .form-group:nth-child(2) { animation-delay: 0.15s; }
     .form-group:nth-child(3) { animation-delay: 0.2s; }
     .form-group:nth-child(4) { animation-delay: 0.25s; }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 32px;
+    }
+
+    .form-row .form-group {
+        margin-bottom: 0;
+    }
 
     .form-group label {
         display: block;
@@ -613,6 +632,11 @@
         .profile-container {
             grid-template-columns: 1fr;
         }
+
+        .form-row {
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
     }
 
     @media (max-width: 768px) {
@@ -664,6 +688,11 @@
         .profile-name {
             font-size: 1.45rem;
         }
+
+        .form-row {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
     }
 
     @media (max-width: 480px) {
@@ -676,14 +705,16 @@
         }
 
         .profile-picture-wrapper {
-            width: 110px;
-            height: 110px;
+            width: 130px;
+            height: 130px;
+            border: 3px solid rgba(255, 255, 255, 0.5);
         }
 
         .profile-picture-upload {
-            width: 38px;
-            height: 38px;
-            font-size: 0.9rem;
+            width: 44px;
+            height: 44px;
+            font-size: 1.1rem;
+            border: 3px solid white;
         }
 
         .card-body {
@@ -707,6 +738,13 @@
             margin-bottom: 24px;
             padding-bottom: 24px;
         }
+
+        .form-row {
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -759,8 +797,39 @@
                     </div>
                     <div class="card-body">
                         <div class="form-section">
+                            <!-- First Name and Last Name Row -->
+                            <div class="form-row">
+                                {% for field in form %}
+                                    {% if field.name == 'first_name' %}
+                                        <div class="form-group">
+                                            {{ field.label_tag }}
+                                            {{ field }}
+                                            {% if field.errors %}
+                                                <div class="error-message">
+                                                    <i class="fas fa-exclamation-circle"></i>
+                                                    {{ field.errors.0 }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                    {% if field.name == 'last_name' %}
+                                        <div class="form-group">
+                                            {{ field.label_tag }}
+                                            {{ field }}
+                                            {% if field.errors %}
+                                                <div class="error-message">
+                                                    <i class="fas fa-exclamation-circle"></i>
+                                                    {{ field.errors.0 }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+
+                            <!-- Email and Phone -->
                             {% for field in form %}
-                                {% if field.name in 'first_name,last_name,email,phone' %}
+                                {% if field.name in 'email,phone' %}
                                     <div class="form-group">
                                         {{ field.label_tag }}
                                         {{ field }}

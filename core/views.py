@@ -172,16 +172,20 @@ def register(request):
 
 
 def login_view(request):
+    next_url = request.GET.get('next') or request.POST.get('next')
+
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
         user = authenticate(request, username=username, password=password)
         if user:
             login(request, user)
-            return redirect('home')
+            return redirect(next_url or 'home')
         else:
             messages.error(request, 'Invalid credentials.')
-    return render(request, 'login.html')
+    if next_url and request.method != 'POST':
+        messages.info(request, 'Please log in or sign up to continue.')
+    return render(request, 'login.html', {'next': next_url})
 
 
 def logout_view(request):

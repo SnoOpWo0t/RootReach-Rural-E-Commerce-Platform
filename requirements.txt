@@ -11,6 +11,9 @@ crispy-bootstrap4==2025.6
 # Image Processing
 Pillow==11.3.0
 
+# Static file serving for Vercel/Django production
+whitenoise>=6.7.0
+
 # AI & LLM Integration (HuggingFace - completely free, no quotas)
 huggingface-hub>=0.20.0
 requests>=2.31.0
