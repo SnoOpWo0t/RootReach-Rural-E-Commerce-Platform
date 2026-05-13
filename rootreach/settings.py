@@ -30,17 +30,16 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-tyd0zlim4u0h%0ait%@a^=aek1
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False').lower() in {'1', 'true', 'yes', 'on'}
 
-ALLOWED_HOSTS = [
-    host.strip()
-    for host in os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,*.vercel.app').split(',')
-    if host.strip()
-]
+# Build ALLOWED_HOSTS list
+_allowed_hosts = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,*.vercel.app').split(',')
+ALLOWED_HOSTS = [host.strip() for host in _allowed_hosts if host.strip()]
+
+# Always add Vercel URL if available (Vercel sets this automatically)
+_vercel_url = os.getenv('VERCEL_URL', '').strip()
+if _vercel_url:
+    ALLOWED_HOSTS.append(_vercel_url)
 
 LOGIN_URL = '/login/'
-
-vercel_host = os.getenv('VERCEL_URL', '').replace('https://', '').replace('http://', '').strip('/')
-if vercel_host and vercel_host not in ALLOWED_HOSTS:
-    ALLOWED_HOSTS.append(vercel_host)
 
 
 # Application definition
