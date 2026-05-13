@@ -695,6 +695,7 @@ from django.db.models import Q
 from .models import ChatMessage, Product
 from .forms import ChatMessageForm
 
+@login_required
 def product_chat(request, pk):
     product = get_object_or_404(Product, id=pk)
     form = ChatMessageForm(request.POST or None)
