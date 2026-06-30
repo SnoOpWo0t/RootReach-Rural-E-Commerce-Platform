@@ -26,3 +26,10 @@ asgiref==3.9.1
 sqlparse==0.5.3
 tzdata==2025.2
 
+# Database Configuration (Neon/PostgreSQL)
+dj-database-url>=2.1.0
+psycopg2-binary>=2.9.9
+
+# Cloudinary for Media File Storage
+cloudinary>=1.41.0
+django-cloudinary-storage>=0.3.0
