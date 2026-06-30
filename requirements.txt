@@ -28,7 +28,7 @@ tzdata==2025.2
 
 # Database Configuration (Neon/PostgreSQL)
 dj-database-url>=2.1.0
-psycopg[binary]>=3.1.8
+psycopg2-binary>=2.9.9
 
 # Cloudinary for Media File Storage
 cloudinary>=1.41.0
