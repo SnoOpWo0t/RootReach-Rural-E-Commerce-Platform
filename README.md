@@ -135,6 +135,12 @@ RoorReach_1/
 
 Happy coding! 🎉
 
+## 🔑 Test Accounts
+For local testing, the following accounts are set up:
+- **Admin**: Username: `akhi` | Password: `1`
+- **Seller**: Username: `Seller` | Password: `Test@1234`
+- **Buyer**: Username: `Buyer` | Password: `Test@1234`
+
 ## AI Shopping Assistant (New)
 
 RootReach now includes an AI assistant page at `/ai-assistant/`.

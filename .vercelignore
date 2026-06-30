@@ -31,3 +31,6 @@ Tests/
 
 # Exclude other documentation not needed for running the server
 AI_DOCUMENTATION/
+
+# Exclude large git history (This is usually 100MB+)
+.git/
