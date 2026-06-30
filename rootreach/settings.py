@@ -105,14 +105,23 @@ DATABASES = {
     }
 }
 
-DATABASE_URL = os.getenv('DATABASE_URL')
-if DATABASE_URL:
+#DATABASE_URL = os.getenv('DATABASE_URL')
+DATABASE_URL = os.getenv('POSTGRES_URL') or os.getenv('DATABASE_URL')
+
+if DATABASE_URL and not DATABASE_URL.startswith('cloudinary://'):
     clean_url = DATABASE_URL.strip('"').strip("'").strip()
     DATABASES['default'] = dj_database_url.parse(
         clean_url,
         conn_max_age=600,
         ssl_require=True
     )
+# if DATABASE_URL:
+#     clean_url = DATABASE_URL.strip('"').strip("'").strip()
+#     DATABASES['default'] = dj_database_url.parse(
+#         clean_url,
+#         conn_max_age=600,
+#         ssl_require=True
+#     )
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 USE_X_FORWARDED_HOST = True
