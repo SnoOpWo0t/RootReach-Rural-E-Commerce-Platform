@@ -107,8 +107,9 @@ DATABASES = {
 
 DATABASE_URL = os.getenv('DATABASE_URL')
 if DATABASE_URL:
-    DATABASES['default'] = dj_database_url.config(
-        default=DATABASE_URL,
+    clean_url = DATABASE_URL.strip('"').strip("'").strip()
+    DATABASES['default'] = dj_database_url.parse(
+        clean_url,
         conn_max_age=600,
         ssl_require=True
     )
