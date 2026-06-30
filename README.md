@@ -99,6 +99,9 @@ For production, you'll also need:
 ### Vercel deployment
 This project now includes a Vercel serverless entrypoint in `api/index.py` and a `vercel.json` build config.
 
+> [!WARNING]
+> **Deployment Size Limits:** Vercel has a strict 250MB limit for serverless functions. To prevent the "Total bundle size exceeds the maximum function size" error during redeployment, make sure large files (like `chromedriver.exe`, `venv` folders, and SQLite databases) are excluded from the build. We've included a `.vercelignore` file which handles this automatically!
+
 Before deploying, set these environment variables in Vercel:
 - `SECRET_KEY`
 - `DEBUG=false`

@@ -1,0 +1,33 @@
+# .vercelignore
+# This file tells Vercel which files to EXCLUDE from the deployment bundle
+# It helps prevent the "Total bundle size exceeds the maximum function size" error
+
+# Exclude large binary files
+chromedriver.exe
+
+# Exclude virtual environments
+venv/
+.venv/
+env/
+
+# Exclude local database files
+db.sqlite3
+*.sqlite3
+
+# Exclude user uploads (since Vercel doesn't store them persistently anyway)
+media/
+
+# Exclude IDE/editor files
+.idea/
+.vscode/
+
+# Exclude Python cache and tests
+__pycache__/
+*.pyc
+*.pyo
+test_reports/
+Tests/
+.pytest_cache/
+
+# Exclude other documentation not needed for running the server
+AI_DOCUMENTATION/
