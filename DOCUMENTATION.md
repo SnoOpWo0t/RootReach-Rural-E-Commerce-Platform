@@ -58,4 +58,28 @@ Highlights authentic, local, and artisan goods.
 - **JavaScript errors in chat?** Ensure your template includes `data-product-id="{{ product.id }}"`.
 
 ---
+
+## 🚀 4. Deployment & Vercel Setup
+
+RootReach is fully configured for serverless deployment on Vercel. It automatically handles the transition from local development to production.
+
+### Auto-Switching Database (Neon PostgreSQL)
+When developing locally, the app uses `db.sqlite3`. When deployed to Vercel, it automatically switches to Neon.
+1. **Never** put `DATABASE_URL` in your local `.env` file (this will wipe out your local site data!).
+2. **Always** put `DATABASE_URL` directly in the Vercel Dashboard → Settings → Environment Variables.
+
+### Cloudinary (Media File Hosting)
+Vercel has a read-only filesystem, meaning profile pictures and product images cannot be saved directly to the server. 
+1. Create a [Cloudinary](https://cloudinary.com) account.
+2. Get your API Environment Variable (`cloudinary://API_KEY:API_SECRET@CLOUD_NAME`).
+3. Add it as `CLOUDINARY_URL` in your Vercel Environment Variables.
+4. Django will automatically route all uploads directly to Cloudinary.
+
+### Vercel Size Limits & `.vercelignore`
+Vercel has a strict 250MB limit for the Serverless Function bundle. 
+If you get a **"Total bundle size exceeds the maximum function size"** error, it means unnecessary large files are being included.
+- We rely on `.vercelignore` to automatically block files like `.git/` (100MB+), `chromedriver.exe` (19MB), and `venv/` from deploying.
+- The `vercel.json` build command is simply: `python manage.py collectstatic --noinput`. (Do NOT run `migrate` during the Vercel build step, as it can cause connection timeouts).
+
+---
 *Generated: April 2026. This file replaces the legacy AI, Quick Reference, and Trending documentation files.*
