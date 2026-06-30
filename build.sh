@@ -1,9 +1,8 @@
 #!/bin/bash
+set -e
+
 echo "Installing dependencies..."
 pip install -r requirements.txt
 
-echo "Running migrations..."
-python manage.py migrate
+echo "Build successful! Skipping migrations and collectstatic since they are handled locally."
 
-echo "Collecting static files..."
-python manage.py collectstatic --noinput
