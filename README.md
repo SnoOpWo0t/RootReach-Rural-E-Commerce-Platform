@@ -1,163 +1,201 @@
-# RoorReach Django E-commerce Project Setup Guide
+<div align="center">
+  <img src="https://via.placeholder.com/200x200.png?text=RootReach+Logo" alt="RootReach Logo" width="150" height="150"/>
 
-## 📋 Prerequisites
-Before you start, make sure you have:
-- Python 3.8 or higher installed on your computer
-- Git (optional, for version control)
+  # RootReach
+  
+  **A Modern Rural E-Commerce Platform Empowering Local Businesses**
+  
+  [![Python](https://img.shields.io/badge/Python-3.8+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+  [![Django](https://img.shields.io/badge/Django-5.2-092E20?style=for-the-badge&logo=django&logoColor=white)](https://www.djangoproject.com/)
+  [![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com/)
+  
+  [Features](#✨-features) • [Quick Start](#🚀-quick-start) • [Deployment](#🌐-deployment) • [AI Assistant](#🤖-ai-assistant) • [Structure](#🎯-project-structure)
+</div>
 
-## 🚀 Quick Start Guide for Beginners
+---
 
-### Step 1: Download/Clone the Project
-If you have Git:
+## 📖 About RootReach
+
+**RootReach** is a comprehensive, rural-focused e-commerce platform built on the robust Django framework. Our mission is to connect rural artisans, farmers, and local sellers with a wider market, providing them with an intuitive and powerful platform to manage and grow their businesses.
+
+## 📸 Gallery
+
+> **Note:** Add your project screenshots and GIFs to a `docs/images/` directory in your repository and update the paths below.
+
+### Platform Demo
+<div align="center">
+  <img src="https://via.placeholder.com/800x450.gif?text=Platform+Demo+GIF" alt="RootReach Demo GIF" width="800"/>
+</div>
+
+### Screenshots
+<p align="center">
+  <img src="https://via.placeholder.com/400x250.png?text=Home+Page" alt="Home Page" width="400"/>
+  <img src="https://via.placeholder.com/400x250.png?text=Seller+Dashboard" alt="Dashboard" width="400"/>
+</p>
+
+---
+
+## ✨ Features
+
+- **Multi-Role User Ecosystem:** Seamless experiences tailored for Buyers, Sellers, and Administrators.
+- **Smart Product Management:** Robust tools for rural sellers to manage inventory and orders.
+- **AI-Powered Discovery:** A built-in AI shopping assistant that recommends products based on natural language requests.
+- **Modern UI/UX:** Clean, responsive design powered by Bootstrap 4 and Django Crispy Forms.
+- **Ready for the Cloud:** Serverless deployment configuration pre-setup for Vercel.
+
+---
+
+## 🚀 Quick Start
+
+Follow these steps to get a local development environment up and running.
+
+### 1. Prerequisites
+Ensure you have the following installed:
+- **Python 3.8+**
+- **Git** (optional, but recommended)
+
+### 2. Installation Steps
+
+**Clone the repository:**
 ```bash
 git clone <repository-url>
-cd RoorReach_1
+cd RootReach-Rural-E-Commerce-Platform
 ```
 
-If you downloaded as ZIP:
-- Extract the ZIP file
-- Open terminal/command prompt in the project folder
-
-### Step 2: Create Virtual Environment
+**Set up your virtual environment:**
 ```bash
 # Windows
 python -m venv .venv
+.venv\Scripts\activate
 
 # macOS/Linux
 python3 -m venv .venv
-```
-
-### Step 3: Activate Virtual Environment
-```bash
-# Windows (Command Prompt)
-.venv\Scripts\activate
-
-# Windows (PowerShell)
-.venv\Scripts\Activate.ps1
-
-# macOS/Linux
 source .venv/bin/activate
 ```
 
-### Step 4: Install Dependencies
+**Install dependencies:**
 ```bash
 pip install -r requirements.txt
 ```
 
-### Step 5: Set Up Database
+**Prepare the database:**
 ```bash
 python manage.py migrate
 ```
 
-### Step 6: Create Admin User (Optional)
+*(Optional) Create a superuser for the admin dashboard:*
 ```bash
 python manage.py createsuperuser
 ```
 
-### Step 7: Run the Development Server
+**Launch the development server:**
 ```bash
 python manage.py runserver
 ```
+Navigate to `http://127.0.0.1:8000/` in your browser to view the application!
 
-### Step 8: Open Your Browser
-Visit: http://127.0.0.1:8000/
-
-## 🛠️ Alternative Installation (One-Line Command)
-If you want to install specific versions manually:
-```bash
-pip install Django==5.2.6 django-crispy-forms==2.4 crispy-bootstrap4==2025.6 Pillow==11.3.0
-```
-
-## 📦 What Each Package Does
-- **Django**: The main web framework
-- **django-crispy-forms**: Makes forms look better with Bootstrap styling
-- **crispy-bootstrap4**: Bootstrap 4 templates for crispy forms
-- **Pillow**: Handles image processing (profile pictures, product images)
-
-## 🔧 Troubleshooting
-
-### If you get "python is not recognized":
-- Make sure Python is installed and added to PATH
-- Try using `py` instead of `python` on Windows
-
-### If virtual environment activation fails:
-- On Windows PowerShell, you might need to run:
-  ```powershell
-  Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-  ```
-
-### If pip install fails:
-- Update pip first: `python -m pip install --upgrade pip`
-- Try: `python -m pip install -r requirements.txt`
-
-## 🌐 Production Deployment
-For production, you'll also need:
-- A production database (PostgreSQL recommended)
-- A web server (Nginx + Gunicorn)
-- Environment variables for secrets
-
-### Vercel deployment
-This project now includes a Vercel serverless entrypoint in `api/index.py` and a `vercel.json` build config.
-
-> [!WARNING]
-> **Deployment Size Limits:** Vercel has a strict 250MB limit for serverless functions. To prevent the "Total bundle size exceeds the maximum function size" error during redeployment, make sure large files (like `chromedriver.exe`, `venv` folders, and SQLite databases) are excluded from the build. We've included a `.vercelignore` file which handles this automatically!
-
-Before deploying, set these environment variables in Vercel:
-- `SECRET_KEY`
-- `DEBUG=false`
-- `ALLOWED_HOSTS=your-project.vercel.app`
-
-Important: Vercel is best used here as a demo deployment. SQLite and local `media/` uploads are not durable there, so for real production you should move the database and uploads to external managed services.
-
-## 📞 Support
-If you encounter any issues, check:
-1. Python version: `python --version`
-2. Virtual environment is activated (you should see `.venv` in terminal prompt)
-3. All packages installed: `pip list`
-
-## 🎯 Project Structure
-```
-RoorReach_1/
-├── manage.py              # Django management script
-├── requirements.txt       # This file - lists all dependencies
-├── db.sqlite3            # Database file
-├── rootreach/            # Main project settings
-│   ├── settings.py
-│   ├── urls.py
-│   └── wsgi.py
-├── core/                 # Main application
-│   ├── models.py         # Database models
-│   ├── views.py          # Business logic
-│   ├── templates/        # HTML templates
-│   └── static/           # CSS, JS, images
-└── media/                # User uploaded files
-```
-
-Happy coding! 🎉
+---
 
 ## 🔑 Test Accounts
-For local testing, the following accounts are set up:
-- **Admin**: Username: `akhi` | Password: `1`
-- **Seller**: Username: `Seller` | Password: `Test@1234`
-- **Buyer**: Username: `Buyer` | Password: `Test@1234`
+For local testing, the following accounts are pre-configured:
 
-## AI Shopping Assistant (New)
+| Role | Username | Password |
+|------|----------|----------|
+| **Admin** | `akhi` | `1` |
+| **Seller** | `Seller` | `Test@1234` |
+| **Buyer** | `Buyer` | `Test@1234` |
 
-RootReach now includes an AI assistant page at `/ai-assistant/`.
+---
 
-### What it does
-- Accepts natural language shopping requests (example: product type, budget, location).
-- Recommends matching products from your catalog.
-- Works in two modes:
-  - Catalog intelligence mode (built-in ranking, no API key needed)
-  - LLM-assisted mode (if OpenAI API key is configured)
+## 🤖 AI Shopping Assistant
 
-### Optional OpenAI setup
-Set these environment variables before running the server:
+RootReach features a cutting-edge AI shopping assistant available at `/ai-assistant/`.
+
+**Capabilities:**
+- Understands natural language shopping requests (e.g., budget, product type, location).
+- Smartly recommends matching products from the platform's catalog.
+- **Dual Modes:** Runs entirely on catalog intelligence (no API key required), or optionally via LLM assistance for advanced reasoning.
+
+**Optional LLM Setup:**
+To enable OpenAI integration, set the following environment variables before starting your server:
 
 ```powershell
 $env:OPENAI_API_KEY="your_openai_api_key"
 $env:OPENAI_MODEL="gpt-4o-mini"
 ```
 
-If `OPENAI_API_KEY` is not set, the assistant will still work using local ranking logic.
+---
+
+## 🎯 Project Structure
+
+```text
+RootReach/
+├── manage.py              # Django management script
+├── requirements.txt       # Project dependencies
+├── db.sqlite3             # Local SQLite database
+├── rootreach/             # Main project settings & configurations
+│   ├── settings.py
+│   ├── urls.py
+│   └── wsgi.py
+├── core/                  # Core application (business logic)
+│   ├── models.py          # Database models
+│   ├── views.py           # View controllers
+│   ├── templates/         # HTML templates
+│   └── static/            # CSS, JS, and image assets
+├── api/                   # Serverless entrypoints (Vercel)
+└── media/                 # User-uploaded files (images, documents)
+```
+
+---
+
+## 📦 Tech Stack & Packages
+
+- **Django 5.2:** The core web framework.
+- **django-crispy-forms & crispy-bootstrap4:** For beautiful, responsive form rendering.
+- **Pillow 11.3:** For robust image processing (profile pictures, product images).
+- **SQLite:** Default local database (PostgreSQL recommended for production).
+
+---
+
+## 🌐 Deployment
+
+### Vercel Integration
+This project is configured for serverless deployment on Vercel out of the box using `api/index.py` and `vercel.json`.
+
+> [!WARNING]
+> **Vercel Size Limits:** Vercel enforces a 250MB limit on serverless functions. To avoid deployment failures, large files like `venv/` or the SQLite database are automatically excluded via `.vercelignore`.
+
+**Required Vercel Environment Variables:**
+- `SECRET_KEY`
+- `DEBUG=false`
+- `ALLOWED_HOSTS=your-project.vercel.app`
+
+> [!NOTE]
+> Vercel is ideal for demonstration purposes. For full production, migrate your database to a managed service (e.g., Neon, AWS RDS) and use external storage (e.g., AWS S3, Cloudinary) for media files, as local storage on Vercel is ephemeral.
+
+### Traditional Production Stack
+For a standard VPS or dedicated server deployment, the recommended stack is:
+- **Database:** PostgreSQL
+- **Web Server:** Nginx + Gunicorn
+- **Secrets Management:** Environment variables (`.env`)
+
+---
+
+## 🔧 Troubleshooting
+
+- **"python is not recognized"**: Ensure Python is added to your system's `PATH`. On Windows, try using the `py` command.
+- **Virtual environment activation fails**: If you are using PowerShell on Windows, you may need to update your execution policy:
+  ```powershell
+  Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+  ```
+- **Pip install fails**: Try upgrading pip first:
+  ```bash
+  python -m pip install --upgrade pip
+  python -m pip install -r requirements.txt
+  ```
+
+---
+
+<div align="center">
+  <i>Developed with ❤️ for rural empowerment. Happy Coding! 🎉</i>
+</div>
