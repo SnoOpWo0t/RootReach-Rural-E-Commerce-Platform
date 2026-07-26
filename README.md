@@ -20,17 +20,37 @@
 
 ## 📸 Gallery
 
-> **Note:** Add your project screenshots and GIFs to a `docs/images/` directory in your repository and update the paths below.
+> **Note:** These are older screenshots. The latest version of RootReach includes many more features and updates!
 
-### Platform Demo
+### Thumbnail
 <div align="center">
-  <img src="https://via.placeholder.com/800x450.gif?text=Platform+Demo+GIF" alt="RootReach Demo GIF" width="800"/>
+  <img src="Screenshots/thumbnail.png" alt="RootReach Thumbnail" width="800"/>
 </div>
 
 ### Screenshots
 <p align="center">
-  <img src="https://via.placeholder.com/400x250.png?text=Home+Page" alt="Home Page" width="400"/>
-  <img src="https://via.placeholder.com/400x250.png?text=Seller+Dashboard" alt="Dashboard" width="400"/>
+  <img src="Screenshots/1.png" alt="Screenshot 1" width="400"/>
+  <img src="Screenshots/2.png" alt="Screenshot 2" width="400"/>
+  <img src="Screenshots/3.png" alt="Screenshot 3" width="400"/>
+  <img src="Screenshots/4.png" alt="Screenshot 4" width="400"/>
+  <img src="Screenshots/5.png" alt="Screenshot 5" width="400"/>
+  <img src="Screenshots/6.png" alt="Screenshot 6" width="400"/>
+  <img src="Screenshots/7.png" alt="Screenshot 7" width="400"/>
+  <img src="Screenshots/8.png" alt="Screenshot 8" width="400"/>
+  <img src="Screenshots/9.png" alt="Screenshot 9" width="400"/>
+  <img src="Screenshots/10.png" alt="Screenshot 10" width="400"/>
+  <img src="Screenshots/11.png" alt="Screenshot 11" width="400"/>
+  <img src="Screenshots/12.png" alt="Screenshot 12" width="400"/>
+  <img src="Screenshots/13.png" alt="Screenshot 13" width="400"/>
+  <img src="Screenshots/14.png" alt="Screenshot 14" width="400"/>
+  <img src="Screenshots/15.png" alt="Screenshot 15" width="400"/>
+  <img src="Screenshots/16.png" alt="Screenshot 16" width="400"/>
+  <img src="Screenshots/17.png" alt="Screenshot 17" width="400"/>
+  <img src="Screenshots/18.png" alt="Screenshot 18" width="400"/>
+  <img src="Screenshots/19.png" alt="Screenshot 19" width="400"/>
+  <img src="Screenshots/20.png" alt="Screenshot 20" width="400"/>
+  <img src="Screenshots/21.png" alt="Screenshot 21" width="400"/>
+  <img src="Screenshots/22.png" alt="Screenshot 22" width="400"/>
 </p>
 
 ---
